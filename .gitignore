@@ -1,0 +1,14 @@
+node_modules/
+.env
+*.log
+npm-out.txt
+
+# Sessions de télémétrie enregistrées (volumineuses) : seules les fixtures réduites sont versionnées
+logs/
+*.ndjson
+!**/fixtures/*.ndjson
+
+# Bases locales
+data/
+*.sqlite
+*.db
