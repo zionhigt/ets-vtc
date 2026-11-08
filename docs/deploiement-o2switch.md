@@ -48,12 +48,21 @@ Pour vérifier : `nslookup vtc.mondomaine.fr` doit renvoyer l'IP de l'hébergeme
 
 ## 2. Créer le sous-domaine
 
-1. cPanel → **Domaines** → **Créer un nouveau domaine**.
-2. Domaine : `vtc.mondomaine.fr`. Décocher « partager la racine du document » si
-   la case est proposée ; laisser cPanel proposer le dossier racine
-   (`~/vtc.mondomaine.fr`). Ce dossier ne servira pas : c'est l'application Node qui
-   répondra pour ce domaine.
-3. Valider.
+`vtc.mondomaine.fr` est un **sous-domaine** de ton domaine. Selon la version de
+cPanel, il se crée à l'un de ces deux endroits (même résultat) :
+
+- **Interface récente** : cPanel → **Domaines** → **Créer un nouveau domaine** →
+  saisir `vtc.mondomaine.fr`. cPanel le rattache lui-même à ton domaine principal.
+  Décocher « partager la racine du document » si la case est proposée.
+- **Interface plus ancienne** : cPanel → **Sous-domaines** → sous-domaine `vtc`,
+  domaine `mondomaine.fr`.
+
+Laisser cPanel proposer le dossier racine (`~/vtc.mondomaine.fr`) : il ne servira
+pas, c'est l'application Node qui répondra pour cette adresse. Valider.
+
+**Variante** : si le domaine sert uniquement à la VTC, inutile de créer un
+sous-domaine. Sauter cette étape et utiliser `mondomaine.fr` partout où ce guide
+écrit `vtc.mondomaine.fr` (Application URL à l'étape 5, `PUBLIC_URL`, liens).
 
 ### Certificat HTTPS
 
