@@ -102,6 +102,24 @@ test("l'état suit la partie : en attente du jeu, jeu détecté, livraison en co
   assert.deepEqual([...new Set(states)], ['waitingGame', 'inGame', 'onJob', 'stopped']);
 });
 
+test('les montants en BigInt de la télémétrie partent sans bloquer la file (régression)', async () => {
+  // La librairie fournit les montants en BigInt : avant correction, le lot
+  // échouait en « Serveur injoignable (TypeError) » et bloquait la file.
+  const { tracker, telemetry } = makeTracker(t.url, mkdtempSync(path.join(tmpdir(), 'ets-vtc-q-')));
+  tracker.start();
+  telemetry.emit('connected');
+  const started = fixture.find((r) => r.type === 'event:job-started').data;
+  telemetry.emit('job-started', { ...started, cargoId: 'bigint_cargo', jobIncome: 1234n });
+  telemetry.emit('fine', { fineOffence: 'speeding', fineAmount: 700n });
+  telemetry.emit('tollgate', { tollgatePayAmount: 12n });
+  await tracker.flush();
+  assert.equal(tracker.status.server.ok, true, tracker.status.server.message);
+  assert.equal(tracker.status.queued, 0);
+  await tracker.stop();
+  const row = await t.db.get("SELECT income, fines_total, tolls_total FROM deliveries WHERE cargo_id = 'bigint_cargo'");
+  assert.deepEqual([Number(row.income), Number(row.fines_total), Number(row.tolls_total)], [1234, 700, 12]);
+});
+
 test('un token révoqué arrête proprement les envois et le signale', async () => {
   const admin = (await t.login(t.adminToken)).accessToken;
   const r = await t.call('POST', '/admin/users', { token: admin, body: { username: 'revoque', displayName: 'Révoqué' } });

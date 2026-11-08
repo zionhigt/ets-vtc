@@ -1,5 +1,7 @@
 // Client de l'API ets-vtc : connexion par token personnel, rafraîchissement
 // automatique, envoi des lots d'événements.
+import { safeStringify } from '@ets-vtc/shared';
+
 export class AuthError extends Error {}
 export class OfflineError extends Error {}
 
@@ -20,6 +22,9 @@ export class ApiClient {
    * l'annulation (constaté sous Electron après une coupure brutale du serveur).
    */
   async #request(method, route, body, token) {
+    // Sérialisation hors du bloc réseau : une erreur de données ne doit jamais
+    // passer pour « Serveur injoignable ». Les BigInt deviennent du texte.
+    const payload = body === undefined ? undefined : safeStringify(body);
     const controller = new AbortController();
     let timer;
     const timeout = new Promise((_, reject) => {
@@ -34,11 +39,11 @@ export class ApiClient {
         res = await this.fetch(`${this.base}${route}`, {
           method,
           headers: { 'content-type': 'application/json', ...(token && { authorization: `Bearer ${token}` }) },
-          body: body === undefined ? undefined : JSON.stringify(body),
+          body: payload,
           signal: controller.signal,
         });
       } catch (err) {
-        throw new OfflineError(`Serveur injoignable (${err.cause?.code ?? err.name})`);
+        throw new OfflineError(`Serveur injoignable (${describeNetworkError(err)})`, { cause: err });
       }
       const json = await res.json().catch(() => null);
       return { status: res.status, json };
@@ -103,6 +108,21 @@ export class ApiClient {
     const r = await this.#authed('GET', '/me/deliveries');
     return r.json;
   }
+}
+
+/**
+ * Résumé lisible d'une erreur réseau : `fetch failed` cache la vraie cause
+ * (code système, erreur agrégée IPv4/IPv6 de « localhost », socket fermé…).
+ */
+export function describeNetworkError(err) {
+  const cause = err?.cause;
+  return (
+    cause?.code ??
+    cause?.errors?.find((e) => e?.code)?.code ??
+    cause?.cause?.code ??
+    (cause?.message ? `${cause.name ?? 'Error'}: ${cause.message}` : null) ??
+    (err?.message ? `${err.name}: ${err.message}` : String(err))
+  );
 }
 
 /** Compare deux versions semver simples : -1, 0, 1. */

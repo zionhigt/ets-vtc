@@ -41,8 +41,11 @@ export class PersistentQueue {
       this.dropped++;
       this.#rewrite();
     }
-    this.items.push(event);
-    appendFileSync(this.file, `${safeStringify(event)}\n`);
+    // La mémoire garde exactement ce qui est écrit sur disque : la télémétrie
+    // fournit des BigInt (montants), que JSON.stringify refuserait à l'envoi.
+    const line = safeStringify(event);
+    this.items.push(JSON.parse(line));
+    appendFileSync(this.file, `${line}\n`);
     return true;
   }
 
