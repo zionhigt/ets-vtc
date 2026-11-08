@@ -18,7 +18,7 @@ sont gardés sur le disque et envoyés au retour de la connexion.
 
 Données locales, dans `%APPDATA%\ets-vtc` : `config.json` (paramètres),
 `token.bin` (token chiffré par Windows pour l'utilisateur courant), `queue/`
-(événements en attente d'envoi).
+(événements en attente d'envoi), `tracker.log` (journal pour le support, 1 Mo max).
 
 ## Pour le développement
 

@@ -10,6 +10,7 @@ import { ApiClient, AuthError, compareVersions } from '../core/client.js';
 import { Tracker } from '../core/tracker.js';
 import { findGameInstalls, pluginStatus, installPlugin, uninstallPlugin, isGameRunning, isGameDir } from '../core/game.js';
 import { WorkerTelemetry } from './worker-telemetry.js';
+import { createLog } from '../core/log.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SMOKE = process.env.ETS_VTC_SMOKE === '1';
@@ -17,7 +18,8 @@ const SMOKE = process.env.ETS_VTC_SMOKE === '1';
 if (!app.requestSingleInstanceLock()) app.quit();
 
 const dataDir = app.getPath('userData');
-const log = (...a) => console.log('[ets-vtc]', ...a);
+const log = createLog(dataDir);
+log(`démarrage v${app.getVersion()}`);
 
 /** DLL fournie avec le tracker (resources/plugin en dev, à côté de l'exe une fois packagé). */
 function bundledDll() {
@@ -68,6 +70,7 @@ function buildTracker() {
     snapshotIntervalMs: config.snapshotIntervalMs,
   });
   tracker.on('status', push);
+  tracker.on('log', log);
   tracker.on('auth-error', () => {
     tracker.stop();
     user = null;
@@ -81,6 +84,7 @@ async function connect(serverUrl, token) {
   versionInfo = { min: version.minTrackerVersion, outdated: compareVersions(app.getVersion(), version.minTrackerVersion) < 0 };
   if (versionInfo.outdated) throw new Error(`Version du tracker trop ancienne : ${version.minTrackerVersion} minimum requise`);
   user = await c.login();
+  log(`connecté à ${serverUrl} en tant que ${user.displayName}`);
   client = c;
   buildTracker();
   if (config.autoStartTracking) tracker.start();

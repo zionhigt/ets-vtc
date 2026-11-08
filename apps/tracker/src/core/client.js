@@ -13,20 +13,42 @@ export class ApiClient {
     this.session = null;
   }
 
+  /**
+   * Une requête complète (envoi + lecture de la réponse) ne dépasse jamais
+   * timeoutMs. Le délai est géré ici par un minuteur explicite, et la course
+   * contre ce minuteur garantit que la promesse se termine même si fetch ignore
+   * l'annulation (constaté sous Electron après une coupure brutale du serveur).
+   */
   async #request(method, route, body, token) {
-    let res;
+    const controller = new AbortController();
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        controller.abort();
+        reject(new OfflineError(`Serveur injoignable (pas de réponse en ${this.timeoutMs / 1000} s)`));
+      }, this.timeoutMs);
+    });
+    const exchange = (async () => {
+      let res;
+      try {
+        res = await this.fetch(`${this.base}${route}`, {
+          method,
+          headers: { 'content-type': 'application/json', ...(token && { authorization: `Bearer ${token}` }) },
+          body: body === undefined ? undefined : JSON.stringify(body),
+          signal: controller.signal,
+        });
+      } catch (err) {
+        throw new OfflineError(`Serveur injoignable (${err.cause?.code ?? err.name})`);
+      }
+      const json = await res.json().catch(() => null);
+      return { status: res.status, json };
+    })();
     try {
-      res = await this.fetch(`${this.base}${route}`, {
-        method,
-        headers: { 'content-type': 'application/json', ...(token && { authorization: `Bearer ${token}` }) },
-        body: body === undefined ? undefined : JSON.stringify(body),
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-    } catch (err) {
-      throw new OfflineError(`Serveur injoignable (${err.cause?.code ?? err.name})`);
+      return await Promise.race([exchange, timeout]);
+    } finally {
+      clearTimeout(timer);
+      exchange.catch(() => {}); // une requête abandonnée ne doit pas lever d'erreur non gérée
     }
-    const json = await res.json().catch(() => null);
-    return { status: res.status, json };
   }
 
   /** Échange le token personnel contre une session. */
