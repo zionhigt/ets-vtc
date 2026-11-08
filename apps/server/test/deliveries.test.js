@@ -62,7 +62,9 @@ test("critère de sortie phase 1 : la session réelle produit une livraison visi
 
   const stats = (await t.call('GET', '/public/stats')).body;
   assert.equal(stats.deliveries, 1);
-  assert.equal(stats.distanceKm, 382);
+  assert.equal(stats.deliveredKm, 382);
+  // Kilométrage réel : compteur des 3 snapshots de la fixture (2971,36 → 3043,63 → 3115,87 km).
+  assert.equal(Math.round(stats.distanceKm * 100) / 100, 144.51);
   assert.equal(stats.revenue, 968);
   assert.equal(stats.activeDrivers30d >= 0, true);
 

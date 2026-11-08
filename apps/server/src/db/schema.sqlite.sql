@@ -109,3 +109,17 @@ CREATE TABLE IF NOT EXISTS site_links (
   uses INTEGER NOT NULL DEFAULT 0,
   revoked_at INTEGER
 );
+
+-- Kilométrage réel (compteur du camion), y compris hors mission, par jour (UTC).
+CREATE TABLE IF NOT EXISTS driving_days (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day TEXT NOT NULL,
+  distance_km REAL NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, day)
+);
+
+CREATE TABLE IF NOT EXISTS driving_state (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  last_odometer REAL NOT NULL,
+  last_ts INTEGER NOT NULL
+);

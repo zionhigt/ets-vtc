@@ -13,6 +13,7 @@ const kpi = (label, value) => el('div', { class: 'kpi' }, el('div', { class: 'la
 document.getElementById('kpis').append(
   kpi('Livraisons', fmt.int(stats.deliveries)),
   kpi('Kilomètres parcourus', fmt.km(stats.distanceKm)),
+  kpi("Kilomètres aujourd'hui", fmt.km(stats.distanceTodayKm)),
   kpi("Chiffre d'affaires", fmt.money(stats.revenue)),
   kpi('Chauffeurs', fmt.int(stats.drivers)),
   kpi('En mission', fmt.int(stats.driversOnJob)),

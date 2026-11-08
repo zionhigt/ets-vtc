@@ -112,3 +112,19 @@ CREATE TABLE IF NOT EXISTS site_links (
   uses INT NOT NULL DEFAULT 0,
   revoked_at BIGINT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Kilométrage réel (compteur du camion), y compris hors mission, par jour (UTC).
+CREATE TABLE IF NOT EXISTS driving_days (
+  user_id INT UNSIGNED NOT NULL,
+  day CHAR(10) NOT NULL,
+  distance_km DOUBLE NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, day),
+  CONSTRAINT fk_dd_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS driving_state (
+  user_id INT UNSIGNED NOT NULL PRIMARY KEY,
+  last_odometer DOUBLE NOT NULL,
+  last_ts BIGINT NOT NULL,
+  CONSTRAINT fk_ds_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

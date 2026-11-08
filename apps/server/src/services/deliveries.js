@@ -2,8 +2,9 @@
 // en livraisons (job-started → job-delivered / job-cancelled), avec amendes et péages.
 // Incrémental (curseur par chauffeur) et rejouable (rebuildAll).
 import { toNumber } from '../shared.js';
+import { applySnapshot } from './mileage.js';
 
-const JOB_TYPES = ['job-started', 'job-delivered', 'job-cancelled', 'fine', 'tollgate'];
+const JOB_TYPES = ['job-started', 'job-delivered', 'job-cancelled', 'fine', 'tollgate', 'snapshot'];
 const PAGE = 500;
 
 const num = (v) => {
@@ -131,7 +132,8 @@ async function processUserNow(db, userId) {
     );
     if (!events.length) break;
     for (const ev of events) {
-      await applyEvent(db, userId, ev);
+      if (ev.type === 'snapshot') await applySnapshot(db, userId, ev);
+      else await applyEvent(db, userId, ev);
       last = Number(ev.id);
       processed++;
     }
@@ -143,9 +145,11 @@ async function processUserNow(db, userId) {
   return processed;
 }
 
-/** Recalcule toutes les livraisons depuis le journal brut. */
+/** Recalcule livraisons et kilométrage depuis le journal brut. */
 export async function rebuildAll(db) {
   await db.run('DELETE FROM deliveries');
+  await db.run('DELETE FROM driving_days');
+  await db.run('DELETE FROM driving_state');
   await db.run('DELETE FROM job_cursors');
   const users = await db.all('SELECT id FROM users ORDER BY id');
   let processed = 0;

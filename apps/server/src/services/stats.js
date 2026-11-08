@@ -40,9 +40,16 @@ export async function companyStats(db) {
     [Date.now() - 30 * DAY_MS],
   );
   const onRoad = await db.get("SELECT COUNT(DISTINCT user_id) AS c FROM deliveries WHERE status = 'in_progress'");
+  // Kilométrage réel (compteur), trajets à vide et missions en cours compris.
+  const driven = await db.get('SELECT SUM(distance_km) AS km FROM driving_days');
+  const today = await db.get('SELECT SUM(distance_km) AS km FROM driving_days WHERE day = ?', [
+    new Date().toISOString().slice(0, 10),
+  ]);
   return {
     deliveries: n(totals.deliveries),
-    distanceKm: n(totals.km),
+    distanceKm: n(driven.km),
+    distanceTodayKm: n(today.km),
+    deliveredKm: n(totals.km),
     revenue: n(totals.revenue),
     fines: n(totals.fines),
     tolls: n(totals.tolls),
@@ -74,20 +81,23 @@ export async function recentDeliveries(db, { limit = 20, before = null, driverId
 export async function driverStats(db) {
   const rows = await db.all(
     `SELECT u.id, u.display_name, u.created_at,
-            COUNT(d.id) AS deliveries, SUM(d.distance_km) AS km, SUM(d.revenue) AS revenue,
-            MAX(d.ended_at) AS last_delivery
+            COUNT(d.id) AS deliveries, SUM(d.distance_km) AS delivered_km, SUM(d.revenue) AS revenue,
+            MAX(d.ended_at) AS last_delivery,
+            (SELECT SUM(dd.distance_km) FROM driving_days dd WHERE dd.user_id = u.id) AS driven_km
      FROM users u LEFT JOIN deliveries d ON d.user_id = u.id AND d.status = 'delivered'
      WHERE u.active = 1
-     GROUP BY u.id, u.display_name, u.created_at
-     ORDER BY km DESC, u.display_name`,
+     GROUP BY u.id, u.display_name, u.created_at`,
   );
-  return rows.map((r) => ({
-    id: Number(r.id),
-    name: r.display_name,
-    since: Number(r.created_at),
-    deliveries: n(r.deliveries),
-    distanceKm: n(r.km),
-    revenue: n(r.revenue),
-    lastDeliveryAt: r.last_delivery === null ? null : Number(r.last_delivery),
-  }));
+  return rows
+    .map((r) => ({
+      id: Number(r.id),
+      name: r.display_name,
+      since: Number(r.created_at),
+      deliveries: n(r.deliveries),
+      distanceKm: n(r.driven_km),
+      deliveredKm: n(r.delivered_km),
+      revenue: n(r.revenue),
+      lastDeliveryAt: r.last_delivery === null ? null : Number(r.last_delivery),
+    }))
+    .sort((a, b) => b.distanceKm - a.distanceKm || a.name.localeCompare(b.name, 'fr'));
 }

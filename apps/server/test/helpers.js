@@ -20,6 +20,8 @@ function testDbConfig() {
 }
 
 const TABLES = [
+  'driving_state',
+  'driving_days',
   'site_links',
   'company_settings',
   'job_cursors',
