@@ -58,6 +58,8 @@ function render(s) {
   f.snapshotIntervalMs.value = String(s.config.snapshotIntervalMs);
   f.autoStartTracking.checked = s.config.autoStartTracking;
   f.startWithWindows.checked = s.config.startWithWindows;
+  f.startWithWindows.disabled = !s.canStartWithWindows;
+  $('startup-hint').hidden = s.canStartWithWindows;
 }
 
 $('login').addEventListener('submit', (e) => {

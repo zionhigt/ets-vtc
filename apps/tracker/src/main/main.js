@@ -31,6 +31,18 @@ function bundledDll() {
 }
 
 let config = loadConfig(dataDir);
+
+/**
+ * Démarrage avec Windows. Un exe portable se décompresse dans un dossier
+ * temporaire à chaque lancement : il faut inscrire l'exe d'origine
+ * (PORTABLE_EXECUTABLE_FILE, fourni par electron-builder), pas process.execPath.
+ * Depuis les sources (npm start), l'option est indisponible.
+ */
+const startupExe = app.isPackaged ? process.env.PORTABLE_EXECUTABLE_FILE ?? process.execPath : null;
+function applyStartWithWindows() {
+  if (!startupExe) return;
+  app.setLoginItemSettings({ openAtLogin: config.startWithWindows, path: startupExe, args: ['--hidden'] });
+}
 const secrets = new SecretStore(dataDir, safeStorage);
 const queue = new PersistentQueue(path.join(dataDir, 'queue'));
 let client = null;
@@ -48,6 +60,7 @@ function state() {
     user,
     hasToken: Boolean(secrets.load()),
     encryptionAvailable: secrets.available,
+    canStartWithWindows: Boolean(startupExe),
     tracker: tracker?.status ?? { state: 'stopped', label: 'Arrêté', running: false, job: null, queued: queue.size, server: {} },
     plugin: config.gameDir ? pluginStatus(config.gameDir, bundledDll()) : null,
     bundledPlugin: Boolean(bundledDll()),
@@ -155,7 +168,7 @@ const handlers = {
     const next = { ...config };
     for (const k of allowed) if (k in patch) next[k] = patch[k];
     config = saveConfig(dataDir, next);
-    app.setLoginItemSettings({ openAtLogin: config.startWithWindows, args: ['--hidden'] });
+    applyStartWithWindows();
     if (tracker) {
       const wasRunning = tracker.running;
       buildTracker();
@@ -224,6 +237,8 @@ app.on('second-instance', () => win?.show());
 app.on('window-all-closed', (e) => e.preventDefault?.());
 
 app.whenReady().then(async () => {
+  // Réinscrit le chemin actuel : l'exe a pu être déplacé depuis l'activation.
+  applyStartWithWindows();
   createWindow();
   createTray();
   const token = secrets.load();
