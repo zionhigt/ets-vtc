@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { MAX_BATCH_SIZE, MAX_EVENT_DATA_BYTES, EVENT_ID_PATTERN, safeStringify } from '@ets-vtc/shared';
+import { MAX_BATCH_SIZE, MAX_EVENT_DATA_BYTES, EVENT_ID_PATTERN, safeStringify } from '../shared.js';
 import { parse, requireAuth } from '../http.js';
 import { ingestEvents, eventStats } from '../services/events.js';
 import { publicUser } from '../services/users.js';

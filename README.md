@@ -57,16 +57,4 @@ Les identifiants sont déterministes : rejouer le même fichier ne crée aucun d
 
 ## Déploiement sur o2switch
 
-1. cPanel → **Bases de données MySQL** : créer une base et un utilisateur.
-2. Cloner le dépôt sur l'hébergement (cPanel → Git Version Control, ou SSH).
-3. cPanel → **Setup Node.js App** → Create Application :
-   - Node.js version : 22 ou plus récent ;
-   - Application root : le dossier du dépôt ;
-   - Application startup file : `apps/server/app.cjs` ;
-   - variables d'environnement : celles de `apps/server/.env.example`, avec
-     `NODE_ENV=production`, `DB_CLIENT=mysql`, les `MYSQL_*` et un `JWT_SECRET`
-     aléatoire de 32 caractères minimum.
-4. **Run NPM Install**, puis **Restart**. Le schéma est appliqué au démarrage.
-5. Créer l'admin via le terminal cPanel (après avoir activé l'environnement Node
-   indiqué en haut de la page de l'application) :
-   `npm run create-admin -- admin "Nom de l'admin"`.
+Voir le guide pas à pas : [docs/deploiement-o2switch.md](docs/deploiement-o2switch.md).

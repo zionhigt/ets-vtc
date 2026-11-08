@@ -10,7 +10,7 @@ import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { recordToEvent, MAX_BATCH_SIZE } from '@ets-vtc/shared';
+import { recordToEvent, MAX_BATCH_SIZE } from '../packages/shared/src/index.js';
 
 export async function replay({ file, server = 'http://localhost:3000', token, batchSize = 200, snapshots = 'slim', log = () => {} }) {
   if (!file || !token) throw new Error('--file et --token sont obligatoires');

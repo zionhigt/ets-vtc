@@ -1,4 +1,4 @@
-import { safeStringify } from '@ets-vtc/shared';
+import { safeStringify } from '../shared.js';
 
 const COLUMNS = ['user_id', 'event_id', 'seq', 'type', 'client_ts', 'received_at', 'data'];
 
