@@ -3,19 +3,38 @@ import { openDb } from '../src/db/index.js';
 import { createApp } from '../src/app.js';
 import { createUser } from '../src/services/users.js';
 
-/** Démarre l'API sur un port libre avec une base SQLite en mémoire. */
+// TEST_DB_CLIENT=mysql (+ MYSQL_*) fait tourner les tests sur MySQL/MariaDB
+// (base vidée à chaque fichier : lancer avec --test-concurrency=1). Sinon SQLite en mémoire.
+function testDbConfig() {
+  if (process.env.TEST_DB_CLIENT !== 'mysql') return { client: 'sqlite', sqliteFile: ':memory:' };
+  return {
+    client: 'mysql',
+    mysql: {
+      host: process.env.MYSQL_HOST ?? '127.0.0.1',
+      port: Number(process.env.MYSQL_PORT ?? 3306),
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
+    },
+  };
+}
+
+const TABLES = ['audit_log', 'raw_events', 'refresh_tokens', 'personal_tokens', 'users'];
+
+/** Démarre l'API sur un port libre avec une base de test vierge. */
 export async function startTestServer(configOverrides = {}) {
   const config = loadConfig({
     skipDotenv: true,
     env: { NODE_ENV: 'test' },
     config: {
-      db: { client: 'sqlite', sqliteFile: ':memory:' },
+      db: testDbConfig(),
       jwtSecret: 'test-secret-test-secret-test-secret-123',
       rateLimit: false,
       ...configOverrides,
     },
   });
   const db = await openDb(config.db);
+  if (db.dialect === 'mysql') for (const table of TABLES) await db.run(`DROP TABLE IF EXISTS ${table}`);
   await db.migrate();
   const server = createApp({ db, config }).listen(0);
   await new Promise((r) => server.once('listening', r));
