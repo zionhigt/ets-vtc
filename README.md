@@ -72,4 +72,5 @@ Les identifiants sont déterministes : rejouer le même fichier ne crée aucun d
 
 ## Déploiement sur o2switch
 
-Voir le guide pas à pas : [docs/deploiement-o2switch.md](docs/deploiement-o2switch.md).
+- [Déployer sur o2switch, de zéro](docs/deploiement-o2switch.md) : domaine, base, application Node, compte admin, lien d'accès.
+- [Guide d'administration](docs/guide-admin.md) : identité de l'entreprise, publication du tracker, accueil d'un chauffeur (compte, token, lien d'accès), gestion courante.
