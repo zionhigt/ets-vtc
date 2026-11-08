@@ -3,6 +3,7 @@
 import { loadConfig } from '../src/config.js';
 import { openDb } from '../src/db/index.js';
 import { createUser } from '../src/services/users.js';
+import { announceDb } from './describe-db.js';
 
 const [username, displayName = username] = process.argv.slice(2);
 if (!username) {
@@ -11,6 +12,7 @@ if (!username) {
 }
 
 const config = loadConfig();
+announceDb(config);
 const db = await openDb(config.db);
 try {
   await db.migrate();

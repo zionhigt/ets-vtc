@@ -7,6 +7,7 @@ import { loadConfig } from '../src/config.js';
 import { openDb } from '../src/db/index.js';
 import { createLink, listLinks, revokeLink, linkUrl } from '../src/services/site-access.js';
 import { audit } from '../src/services/users.js';
+import { announceDb } from './describe-db.js';
 
 const [command, arg] = process.argv.slice(2);
 const usage = `Usage :
@@ -15,6 +16,7 @@ const usage = `Usage :
   npm run site-link -- revoke <id>`;
 
 const config = loadConfig();
+announceDb(config);
 const db = await openDb(config.db);
 const date = (ts) => (ts ? new Date(Number(ts)).toLocaleString('fr-FR') : '–');
 

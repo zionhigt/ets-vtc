@@ -100,7 +100,7 @@ cPanel → **Setup Node.js App** → **Create Application** :
 
 | Champ | Valeur |
 | --- | --- |
-| Node.js version | la plus récente proposée (20 minimum, 22 ou plus conseillé) |
+| Node.js version | la plus récente proposée : **20 minimum** (la liste propose aussi de très vieilles versions comme la 10, qui ne fonctionnent pas) |
 | Application mode | Production |
 | Application root | `apps/ets-vtc` |
 | Application URL | `vtc.mondomaine.fr` (chemin vide) |
@@ -162,7 +162,33 @@ Les étapes suivantes se font en ligne de commande. Deux possibilités :
 Dans le terminal, **toujours activer l'environnement Node d'abord** (commande
 `source …` de l'étape 6), puis `cd ~/apps/ets-vtc`.
 
-## 8. Créer ton compte admin
+## 8. Donner la configuration aux commandes en ligne
+
+Les variables saisies dans cPanel ne sont transmises qu'à l'application lancée par
+Passenger, **pas** au terminal. Les commandes d'administration (`create-admin`,
+`site-link`) lisent, elles, le fichier `apps/server/.env`. Sans lui, elles
+écriraient dans une base SQLite locale et non dans ta base MySQL.
+
+```sh
+cp apps/server/.env.example apps/server/.env
+chmod 600 apps/server/.env
+nano apps/server/.env
+```
+
+Y mettre les **mêmes valeurs que dans cPanel** (étape 5) : `NODE_ENV=production`,
+`DB_CLIENT=mysql`, les `MYSQL_*`, `JWT_SECRET`, `SITE_ACCESS`, `PUBLIC_URL`.
+Dans nano, coller se fait par clic droit ou `Ctrl+Shift+V` ; enregistrer avec
+`Ctrl+O` puis Entrée, quitter avec `Ctrl+X`.
+
+Ce fichier est ignoré par Git (`git pull` n'y touche pas) et n'est pas servi par
+le site ; `chmod 600` le rend lisible par toi seul. Chaque commande affiche la base
+utilisée : elle doit indiquer `MySQL mupa0403_vtc@localhost/…`.
+
+Astuce terminal : une commande copiée avec son retour à la ligne s'exécute dès le
+collage. Pour saisir un mot de passe sans le montrer ni le coller dans une commande :
+`read -rs -p "Mot de passe : " VAR; echo; export VAR`.
+
+## 9. Créer ton compte admin
 
 ```sh
 npm run create-admin -- admin "Ton nom"
@@ -172,7 +198,7 @@ La commande affiche le **token personnel de l'admin** (`vtc_…`). Le copier dan
 gestionnaire de mots de passe : il ne sera plus affiché. Ce token sert à te
 connecter à l'admin web **et** à ton propre tracker si tu roules.
 
-## 9. Créer ton lien d'accès au site
+## 10. Créer ton lien d'accès au site
 
 Avec `SITE_ACCESS=restricted`, le site (pages, admin web) ne s'affiche qu'après
 ouverture d'un lien d'accès. Crée le tien :
@@ -185,11 +211,11 @@ Ouvre le lien affiché (`https://vtc.mondomaine.fr/acces/vsl_…`) dans ton
 navigateur : il dépose un cookie et t'amène sur l'accueil. Le lien sert aussi sur
 tes autres appareils.
 
-## 10. Vérifier
+## 11. Vérifier
 
 1. `https://vtc.mondomaine.fr` : l'accueil « Dispatch » s'affiche (vide pour l'instant).
 2. Lien **Administration** en bas de page, ou `https://vtc.mondomaine.fr/admin` :
-   te connecter avec le token admin de l'étape 8.
+   te connecter avec le token admin de l'étape 9.
 3. Depuis un autre navigateur, sans lien : la page « Accès réservé » s'affiche.
 
 C'est en ligne. La suite : identité de l'entreprise, comptes des chauffeurs, liens
@@ -223,12 +249,14 @@ mettent à jour seuls au redémarrage.
 | Symptôme | Piste |
 | --- | --- |
 | Page d'erreur Passenger, « Incomplete response » | lire le fichier *Passenger log file* (`~/logs/ets-vtc.log`) |
-| `JWT_SECRET doit faire au moins 32 caractères` | variable absente ou trop courte, puis **Restart** |
-| `ER_ACCESS_DENIED_ERROR` | utilisateur non ajouté à la base (étape 3.4), ou préfixe `<identifiant>_` oublié |
-| `Cannot find module 'express'` | dépendances non installées : étape 6 |
+| Page Passenger « something went wrong » en Production mais tout va bien en Development | `JWT_SECRET` absent, mal nommé ou de moins de 32 caractères (exigé en production seulement) |
+| `ER_DBACCESS_DENIED_ERROR` | l'utilisateur n'a pas de droits sur la base : section *Ajouter un utilisateur à une base de données*, puis TOUS LES PRIVILÈGES |
+| `Cannot find package 'dotenv'` ou `'express'` | dépendances non installées : étape 6 (dépôt à jour requis, `git pull`) |
+| Pour voir l'erreur exacte | *Application mode* → Development le temps du diagnostic : Passenger affiche le détail ; revenir ensuite en Production |
+| `ER_ACCESS_DENIED_ERROR` (*using password: YES*) | mot de passe refusé : vérifier `MYSQL_PASSWORD`, le préfixe `<identifiant>_` de l'utilisateur ; tester avec `mysql -u <identifiant>_vtc -p <identifiant>_vtc` (le collage dans une invite de mot de passe échoue souvent : voir l'astuce de l'étape 8) |
 | Le domaine affiche une page o2switch par défaut | *Application URL* de l'étape 5 incorrecte, ou DNS pas encore propagé (étape 1) |
 | Avertissement de certificat | AutoSSL pas encore passé : étape 2, *Run AutoSSL* |
-| Page « Accès réservé » pour toi | ouvrir ton lien d'accès (étape 9) dans ce navigateur |
+| Page « Accès réservé » pour toi | ouvrir ton lien d'accès (étape 10) dans ce navigateur |
 | Premier affichage lent | normal : Passenger arrête l'application inactive et la relance à la requête suivante |
 
 Les intitulés des menus cPanel peuvent varier légèrement selon la version de

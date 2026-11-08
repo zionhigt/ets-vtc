@@ -9,7 +9,7 @@ Deux outils servent à l'administration :
 | Outil | Pour | Où |
 | --- | --- | --- |
 | **Admin web** | identité de l'entreprise, comptes des chauffeurs, tokens, recalcul | lien **Administration** en bas de chaque page, ou `/admin` |
-| **Terminal o2switch** | liens d'accès au site, création du premier admin | cPanel → Terminal ou SSH, environnement Node activé, `cd ~/apps/ets-vtc` (voir l'étape 7 du déploiement) |
+| **Terminal o2switch** | liens d'accès au site, création du premier admin | cPanel → Terminal ou SSH, environnement Node activé, `cd ~/apps/ets-vtc` (étape 7 du déploiement) ; nécessite `apps/server/.env` (étape 8) |
 
 ## 1. Configurer l'entreprise
 
