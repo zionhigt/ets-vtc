@@ -33,7 +33,8 @@ export async function companyStats(db) {
             SUM(fines_total) AS fines, SUM(tolls_total) AS tolls
      FROM deliveries WHERE status = 'delivered'`,
   );
-  const drivers = await db.get("SELECT COUNT(*) AS c FROM users WHERE active = 1 AND role = 'driver'");
+  // Tout compte actif est un employé qui roule, admins compris (le patron conduit aussi).
+  const drivers = await db.get('SELECT COUNT(*) AS c FROM users WHERE active = 1');
   const active = await db.get(
     "SELECT COUNT(DISTINCT user_id) AS c FROM deliveries WHERE status = 'delivered' AND ended_at > ?",
     [Date.now() - 30 * DAY_MS],
@@ -76,7 +77,7 @@ export async function driverStats(db) {
             COUNT(d.id) AS deliveries, SUM(d.distance_km) AS km, SUM(d.revenue) AS revenue,
             MAX(d.ended_at) AS last_delivery
      FROM users u LEFT JOIN deliveries d ON d.user_id = u.id AND d.status = 'delivered'
-     WHERE u.active = 1 AND u.role = 'driver'
+     WHERE u.active = 1
      GROUP BY u.id, u.display_name, u.created_at
      ORDER BY km DESC, u.display_name`,
   );

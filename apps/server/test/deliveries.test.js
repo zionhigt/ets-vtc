@@ -68,6 +68,9 @@ test("critère de sortie phase 1 : la session réelle produit une livraison visi
 
   const drivers = (await t.call('GET', '/public/drivers')).body;
   assert.equal(drivers.find((x) => x.name === 'Séb').deliveries, 1);
+  // Les admins roulent aussi : ils figurent parmi les employés.
+  assert.ok(drivers.some((x) => x.name === 'Admin'));
+  assert.equal(stats.drivers, drivers.length);
 
   // Aucune donnée sensible dans le public.
   const raw = JSON.stringify([list.body, stats, drivers]);
