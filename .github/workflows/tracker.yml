@@ -1,0 +1,72 @@
+name: Tracker
+
+# Construit l'exécutable portable du tracker sur une machine Windows de GitHub
+# (outils C++ inclus pour le module natif de télémétrie). Personne n'a besoin
+# d'outils de compilation en local.
+#   - à chaque push qui touche le tracker : tests + exe en artefact téléchargeable
+#   - sur un tag tracker-vX.Y.Z : exe publié dans une release GitHub
+
+on:
+  push:
+    paths:
+      - 'apps/tracker/**'
+      - 'packages/shared/**'
+      - '.github/workflows/tracker.yml'
+    tags:
+      - 'tracker-v*'
+  workflow_dispatch:
+
+env:
+  PLUGIN_URL: https://github.com/RenCloud/scs-sdk-plugin/releases/download/V.1.12.1/release_v_1_12_1.zip
+  PLUGIN_SHA256: 1d03dbc7a975e72203c60a7b9998021ceb8800b836bf28a131279979ad386cd4
+  PLUGIN_LICENSE_URL: https://raw.githubusercontent.com/RenCloud/scs-sdk-plugin/master/LICENSE
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Dépendances du serveur (tests d'intégration du tracker)
+        run: npm ci
+
+      - name: Dépendances du tracker
+        working-directory: apps/tracker
+        run: npm ci
+
+      - name: Tests du tracker
+        working-directory: apps/tracker
+        run: npm test
+
+      - name: Plugin de télémétrie (scs-sdk-plugin v1.12.1, MIT)
+        shell: pwsh
+        run: |
+          $zip = "$env:RUNNER_TEMP\plugin.zip"
+          Invoke-WebRequest $env:PLUGIN_URL -OutFile $zip
+          Expand-Archive $zip -DestinationPath "$env:RUNNER_TEMP\plugin"
+          $dll = Get-ChildItem "$env:RUNNER_TEMP\plugin" -Recurse -Filter scs-telemetry.dll | Where-Object { $_.Directory.Name -eq 'Win64' }
+          $hash = (Get-FileHash $dll.FullName -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $env:PLUGIN_SHA256) { throw "Empreinte inattendue pour la DLL : $hash" }
+          Copy-Item $dll.FullName apps/tracker/resources/plugin/scs-telemetry.dll
+          Invoke-WebRequest $env:PLUGIN_LICENSE_URL -OutFile apps/tracker/resources/plugin/LICENSE-scs-sdk-plugin.txt
+
+      - name: Exécutable portable
+        working-directory: apps/tracker
+        run: npm run dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ets-vtc-tracker
+          path: apps/tracker/dist/*.exe
+          if-no-files-found: error
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/tracker-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/tracker/dist/*.exe

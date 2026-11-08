@@ -37,7 +37,8 @@
         "from": "resources/plugin",
         "to": "plugin",
         "filter": [
-          "*.dll"
+          "*.dll",
+          "*.txt"
         ]
       }
     ],

@@ -37,6 +37,16 @@ Prérequis Windows : Node 22+, Visual Studio Build Tools (charge de travail
 
 ## Construire l'exécutable
 
+**Par GitHub Actions (recommandé, aucun outil local)** : le workflow
+[tracker.yml](../../.github/workflows/tracker.yml) construit l'exe sur une machine
+Windows à chaque modification du tracker (onglet Actions → artefact
+`ets-vtc-tracker`). Pour publier une version aux chauffeurs : mettre à jour
+`version` dans `package.json`, puis pousser un tag `tracker-v0.1.0` ; l'exe est
+attaché à la release GitHub correspondante. La DLL est téléchargée depuis la
+release officielle et son empreinte SHA-256 vérifiée.
+
+**En local** (Visual Studio Build Tools requis) :
+
 ```sh
 npm run plugin:copy    # copie scs-telemetry.dll depuis le jeu installé (ou: npm run plugin:copy -- chemin\vers\scs-telemetry.dll)
 npm run dist           # dist/ets-vtc-<version>.exe
