@@ -62,12 +62,11 @@ export async function applyCompany() {
     n.textContent = company.slogan;
     n.hidden = !company.slogan;
   });
+  // Logo de l'entreprise s'il est défini par l'admin, sinon celui de la plateforme.
   document.querySelectorAll('[data-company-logo]').forEach((img) => {
-    if (company.logoUrl) {
-      img.src = company.logoUrl;
-      img.alt = company.name;
-      img.hidden = false;
-    }
+    img.src = company.logoUrl || '/assets/brand/logo.png';
+    img.alt = company.name;
+    img.hidden = false;
   });
   const page = document.title.split('·')[0].trim();
   document.title = `${page} · ${company.name}`;

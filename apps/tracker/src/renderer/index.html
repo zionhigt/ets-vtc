@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:">
+  <title>ets-vtc</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="renderer.js"></script>
+</head>
+<body>
+  <header>
+    <h1>ets-vtc</h1>
+    <span id="version" class="muted"></span>
+  </header>
+
+  <div id="error" class="notice error" hidden></div>
+
+  <section id="login-view" hidden>
+    <p class="muted">Colle l'adresse du site de ta VTC et le token personnel transmis par ton admin.</p>
+    <form id="login">
+      <label for="server">Adresse du serveur</label>
+      <input id="server" name="server" placeholder="vtc.mondomaine.fr" required>
+      <label for="token">Token personnel</label>
+      <input id="token" name="token" type="password" placeholder="vtc_…" autocomplete="off" required>
+      <button type="submit">Se connecter</button>
+    </form>
+  </section>
+
+  <section id="main-view" hidden>
+    <div class="card status" id="status-card">
+      <div class="row">
+        <span class="dot" id="dot"></span>
+        <strong id="state-label">Arrêté</strong>
+        <button id="toggle" class="small">Démarrer</button>
+      </div>
+      <p id="job" class="job" hidden></p>
+      <p class="muted" id="server-line"></p>
+      <p class="muted" id="queue-line"></p>
+    </div>
+
+    <h2>Jeu</h2>
+    <div class="card">
+      <p class="path" id="game-dir">Aucune installation sélectionnée</p>
+      <div class="actions">
+        <button class="secondary small" id="detect">Détecter</button>
+        <button class="secondary small" id="choose">Choisir le dossier…</button>
+      </div>
+      <p id="plugin-line"></p>
+      <div class="actions">
+        <button class="small" id="install" hidden>Installer le plugin</button>
+        <button class="secondary small" id="uninstall" hidden>Retirer le plugin</button>
+      </div>
+      <p class="muted small-text">Au lancement, le jeu signale que des fonctionnalités SDK avancées sont utilisées : c'est le plugin de télémétrie, il suffit de valider.</p>
+    </div>
+
+    <h2>Paramètres</h2>
+    <form class="card" id="settings">
+      <label for="interval">Fréquence de suivi de la position</label>
+      <select id="interval" name="snapshotIntervalMs">
+        <option value="2000">Toutes les 2 s</option>
+        <option value="5000">Toutes les 5 s (conseillé)</option>
+        <option value="10000">Toutes les 10 s</option>
+        <option value="30000">Toutes les 30 s</option>
+      </select>
+      <label class="check"><input type="checkbox" name="autoStartTracking"> Démarrer le suivi automatiquement</label>
+      <label class="check"><input type="checkbox" name="startWithWindows"> Lancer ets-vtc avec Windows</label>
+    </form>
+
+    <p class="footer"><span id="who" class="muted"></span> · <button class="link" id="logout">Se déconnecter</button></p>
+  </section>
+</body>
+</html>

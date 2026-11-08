@@ -1,0 +1,46 @@
+:root {
+  --brand: #2563eb;
+  --bg: #f6f7f9;
+  --surface: #fff;
+  --text: #1c1f24;
+  --muted: #5f6672;
+  --border: #e3e6ea;
+  --good: #15803d;
+  --warn: #b45309;
+  --bad: #b91c1c;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #121418; --surface: #1b1e24; --text: #e8eaed; --muted: #9aa1ac; --border: #2c313a; --good: #4ade80; --warn: #fbbf24; --bad: #f87171; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 16px 20px 24px; font: 14px/1.5 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+h1 { font-size: 20px; margin: 0; }
+h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 20px 0 8px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.row { display: flex; align-items: center; gap: 10px; }
+.row button { margin-left: auto; }
+.muted { color: var(--muted); }
+.small-text { font-size: 12px; }
+.ok { color: var(--good); }
+.warn { color: var(--warn); }
+.job { font-weight: 600; margin: 10px 0 0; }
+.status p { margin: 6px 0 0; }
+.path { font-family: Consolas, monospace; font-size: 12px; word-break: break-all; margin-top: 0; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--muted); flex: none; }
+.dot.waitingGame { background: var(--warn); }
+.dot.inGame, .dot.onJob { background: var(--good); }
+form label { display: block; color: var(--muted); font-size: 13px; margin: 10px 0 4px; }
+form label.check { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 14px; }
+input, select { font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; width: 100%; }
+input[type='checkbox'] { width: auto; }
+button { font: inherit; font-weight: 600; border: 1px solid transparent; border-radius: 8px; padding: 9px 16px; background: var(--brand); color: #fff; cursor: pointer; margin-top: 12px; }
+button.small { padding: 6px 12px; margin-top: 0; }
+button.secondary { background: transparent; color: var(--text); border-color: var(--border); }
+button.link { background: none; border: 0; color: var(--brand); padding: 0; margin: 0; font-weight: 400; }
+button:disabled { opacity: .6; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.notice { border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid var(--border); background: var(--surface); }
+.notice.error { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 50%, transparent); }
+.footer { margin-top: 20px; font-size: 13px; }

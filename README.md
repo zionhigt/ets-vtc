@@ -7,17 +7,22 @@ l'implémente phase par phase.
 | Phase | Contenu | État |
 | --- | --- | --- |
 | 0 · Socle | monorepo, base de données, comptes et tokens, ingestion brute, rejeu NDJSON | fait |
-| 1 · MVP | tracker Electron, job livraisons, site (accueil, liste), admin web | à faire |
+| 1 · MVP | tracker Electron, job livraisons, site (accueil, liste), admin web | fait, à valider en conditions réelles |
 | 2 · Entreprise | employés et grades, finances simulées, classements, actus, fiches de paie | à faire |
 | 3 · Confort | page Live avec carte, mise à jour du tracker, admin complet, ATS | à faire |
 
 ## Structure
 
 ```
-apps/server        API Express v1 (auth, admin, ingestion)
+apps/server        API Express v1 (auth, admin, ingestion, jobs, API publique)
+apps/web/public    site public et admin web (statique, servi par l'API)
+apps/tracker       tracker Windows Electron (hors workspaces, voir son README)
 packages/shared    contrat d'événements partagé (tracker, serveur, outils)
 tools/             outils (rejeu de sessions NDJSON)
+docs/              guide de déploiement o2switch
 ```
+
+Pages du site : `/` (accueil), `/livraisons`, `/admin`.
 
 ## Démarrage local
 
@@ -43,6 +48,10 @@ npm test
 | GET, POST | `/admin/users` | admin |
 | GET, PATCH, DELETE | `/admin/users/:id` | admin |
 | POST | `/admin/users/:id/token` (révoque et régénère) | admin |
+| GET, PUT | `/admin/company` (identité de l'entreprise) | admin |
+| POST | `/admin/jobs/rebuild` (recalcule les livraisons) | admin |
+| GET | `/me/deliveries` | chauffeur |
+| GET | `/public/company`, `/public/stats`, `/public/deliveries`, `/public/drivers` | public |
 
 Les routes protégées attendent `Authorization: Bearer <jeton d'accès>`.
 

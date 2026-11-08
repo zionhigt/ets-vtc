@@ -1,0 +1,49 @@
+{
+  "name": "ets-vtc-tracker",
+  "productName": "ets-vtc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tracker de télémétrie ETS2 pour la VTC",
+  "type": "module",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test \"test/**/*.test.js\"",
+    "plugin:copy": "node scripts/copy-plugin.js",
+    "dist": "node scripts/copy-plugin.js --check && electron-builder --win portable"
+  },
+  "dependencies": {
+    "@ets-vtc/shared": "file:../../packages/shared",
+    "trucksim-telemetry": "1.0.0"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "fr.ets-vtc.tracker",
+    "productName": "ets-vtc",
+    "artifactName": "ets-vtc-${version}.exe",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/plugin",
+        "to": "plugin",
+        "filter": [
+          "*.dll"
+        ]
+      }
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "build/icon.png"
+    }
+  }
+}
