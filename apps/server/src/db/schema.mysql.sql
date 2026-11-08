@@ -101,3 +101,14 @@ CREATE TABLE IF NOT EXISTS company_settings (
   setting_key VARCHAR(64) NOT NULL PRIMARY KEY,
   setting_value TEXT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Liens d'accès au site (mode restreint) : seul le hash du token est stocké.
+CREATE TABLE IF NOT EXISTS site_links (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  label VARCHAR(128) NOT NULL,
+  token_hash CHAR(64) NOT NULL UNIQUE,
+  created_at BIGINT NOT NULL,
+  last_used_at BIGINT NULL,
+  uses INT NOT NULL DEFAULT 0,
+  revoked_at BIGINT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

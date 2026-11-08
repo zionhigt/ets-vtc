@@ -16,7 +16,8 @@
     "start": "npm start -w @ets-vtc/server",
     "dev": "npm run dev -w @ets-vtc/server",
     "create-admin": "npm run create-admin -w @ets-vtc/server --",
-    "replay": "node tools/replay-ndjson.js"
+    "replay": "node tools/replay-ndjson.js",
+    "site-link": "npm run site-link -w @ets-vtc/server --"
   },
   "repository": {
     "type": "git",

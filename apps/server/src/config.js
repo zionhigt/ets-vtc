@@ -31,6 +31,10 @@ export function loadConfig(overrides = {}) {
     accessTokenTtl: Number(env.ACCESS_TOKEN_TTL ?? 900),
     refreshTokenTtlDays: Number(env.REFRESH_TOKEN_TTL_DAYS ?? 30),
     minTrackerVersion: env.MIN_TRACKER_VERSION ?? '0.0.0',
+    // restricted (défaut) : site visible seulement avec un lien d'accès ; public : ouvert à tous.
+    siteAccess: env.SITE_ACCESS === 'public' ? 'public' : 'restricted',
+    // Adresse publique du site, pour imprimer les liens d'accès (ex. https://vtc.mondomaine.fr).
+    publicUrl: env.PUBLIC_URL ?? '',
     rateLimit: env.RATE_LIMIT !== 'off',
     ...overrides.config,
   };

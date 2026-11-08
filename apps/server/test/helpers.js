@@ -20,6 +20,7 @@ function testDbConfig() {
 }
 
 const TABLES = [
+  'site_links',
   'company_settings',
   'job_cursors',
   'deliveries',
@@ -39,6 +40,7 @@ export async function startTestServer(configOverrides = {}) {
       db: testDbConfig(),
       jwtSecret: 'test-secret-test-secret-test-secret-123',
       rateLimit: false,
+      siteAccess: 'public',
       ...configOverrides,
     },
   });

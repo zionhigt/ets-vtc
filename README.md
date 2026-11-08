@@ -24,6 +24,11 @@ docs/              guide de déploiement o2switch
 
 Pages du site : `/` (accueil), `/livraisons`, `/admin`.
 
+Accès au site : par défaut (`SITE_ACCESS=restricted`), le site et l'API publique ne
+sont visibles qu'avec un lien d'accès, créé en ligne de commande
+(`npm run site-link -- create "Paul"`, puis `list`, `revoke <id>`). Le tracker et
+l'API admin utilisent leurs propres jetons et n'en dépendent pas.
+
 ## Démarrage local
 
 Node 22.13 ou plus récent (SQLite intégré à Node, rien d'autre à installer).

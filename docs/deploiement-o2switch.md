@@ -6,6 +6,16 @@ d'exécutable et n'est pas installé sur l'hébergement.
 
 Compter 30 minutes pour un premier déploiement.
 
+Ce guide vise l'**offre unique Cloud** d'o2switch : un hébergement mutualisé géré
+par cPanel, et non un VPS. Pas d'accès root, pas de Docker, pas de processus qui
+tourne en permanence. Le projet en tient compte :
+
+- l'application Node est lancée à la demande par Passenger ;
+- les jobs (reconstitution des livraisons) tournent au moment où les événements
+  arrivent, pas dans un processus de fond ;
+- la base est MySQL/MariaDB, fournie par cPanel ;
+- le tracker est construit par GitHub Actions, rien n'est compilé sur l'hébergement.
+
 ## Vue d'ensemble
 
 | Élément | Sur o2switch |
@@ -103,6 +113,8 @@ Puis ajouter les **variables d'environnement** (bouton Add Variable) :
 | `JWT_SECRET` | une chaîne aléatoire d'au moins 32 caractères (voir ci-dessous) |
 | `TRUST_PROXY` | `1` |
 | `MIN_TRACKER_VERSION` | `0.1.0` |
+| `SITE_ACCESS` | `restricted` (site visible uniquement avec un lien d'accès) ou `public` |
+| `PUBLIC_URL` | `https://vtc.mondomaine.fr` (sert à afficher les liens d'accès) |
 
 Pour générer `JWT_SECRET`, dans le Terminal cPanel :
 
@@ -147,15 +159,43 @@ La commande affiche le **token personnel de l'admin**. Le conserver en lieu sûr
 il ne sera plus affiché. En cas de perte, en régénérer un depuis un autre compte
 admin, ou recréer un admin avec un autre identifiant.
 
-## 7. Vérifier
+## 7. Créer ton lien d'accès au site
+
+Avec `SITE_ACCESS=restricted`, le site (pages, admin web, API publique) n'est
+visible que pour les personnes qui ont ouvert un lien d'accès. Le tracker des
+chauffeurs n'est pas concerné : il utilise son propre token.
+
+Dans le Terminal, environnement Node activé :
+
+```sh
+cd ~/apps/ets-vtc
+npm run site-link -- create "Moi"       # affiche https://vtc.mondomaine.fr/acces/vsl_…
+```
+
+Ouvrir ce lien dans son navigateur : il pose un cookie et redirige vers l'accueil.
+Le lien reste valable et peut être ouvert sur d'autres appareils.
+
+Gérer les liens :
+
+```sh
+npm run site-link -- create "Paul"      # un lien par personne : on pourra le révoquer seul
+npm run site-link -- list               # liens, nombre d'ouvertures, dernière utilisation
+npm run site-link -- revoke 3           # coupe l'accès de tous ceux qui ont utilisé le lien n°3 (sous 30 s)
+```
+
+Un lien affiché ne peut pas être réaffiché : en cas de perte, en créer un nouveau
+et révoquer l'ancien.
+
+## 8. Vérifier
 
 ```sh
 curl https://vtc.mondomaine.fr/api/v1/health     # {"status":"ok"}
 curl https://vtc.mondomaine.fr/api/v1/version
 ```
 
-Puis ouvrir `https://vtc.mondomaine.fr/admin`, se connecter avec le token admin,
-renseigner l'identité de l'entreprise et créer les comptes des chauffeurs.
+Puis, depuis le navigateur où le lien d'accès a été ouvert, aller sur
+`https://vtc.mondomaine.fr/admin`, se connecter avec le token admin, renseigner
+l'identité de l'entreprise et créer les comptes des chauffeurs.
 
 ## Mettre à jour
 
@@ -187,6 +227,7 @@ Le schéma de base est mis à jour automatiquement au redémarrage.
 | `ER_ACCESS_DENIED_ERROR` | utilisateur non ajouté à la base, ou préfixe oublié dans `MYSQL_USER` / `MYSQL_DATABASE` |
 | `Cannot find module 'express'` | dépendances non installées : étape 5 |
 | Le site répond lentement au premier accès | normal : Passenger arrête l'application inactive et la relance à la requête suivante |
+| Page « Accès réservé » | ouvrir un lien d'accès (étape 7) dans ce navigateur ; un lien révoqué ne fonctionne plus |
 
 Les points propres à o2switch (noms des menus cPanel, chemin de l'environnement
 Node, comportement de `node_modules`) sont à confirmer au premier déploiement ; ce

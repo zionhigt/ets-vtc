@@ -98,3 +98,14 @@ CREATE TABLE IF NOT EXISTS company_settings (
   setting_key TEXT PRIMARY KEY,
   setting_value TEXT
 );
+
+-- Liens d'accès au site (mode restreint) : seul le hash du token est stocké.
+CREATE TABLE IF NOT EXISTS site_links (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  label TEXT NOT NULL,
+  token_hash TEXT NOT NULL UNIQUE,
+  created_at INTEGER NOT NULL,
+  last_used_at INTEGER,
+  uses INTEGER NOT NULL DEFAULT 0,
+  revoked_at INTEGER
+);
