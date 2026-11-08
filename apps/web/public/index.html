@@ -7,6 +7,9 @@
   <link rel="icon" type="image/png" href="/assets/brand/favicon-192.png">
   <link rel="apple-touch-icon" href="/assets/brand/favicon-192.png">
   <title>Accueil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=Saira:ital,wght@1,800&family=Share+Tech+Mono&display=swap">
   <link rel="stylesheet" href="/assets/style.css">
   <script type="module" src="/assets/home.js"></script>
 </head>
@@ -28,21 +31,32 @@
   </header>
 
   <main class="wrap">
-    <h1 data-company-name>VTC</h1>
-    <p class="lead" id="description">Activité de l'entreprise, mise à jour à chaque livraison.</p>
+    <h1>Dispatch</h1>
+    <p class="lead" id="description">Activité de l'entreprise, en direct.</p>
 
     <section class="kpis" id="kpis" aria-label="Chiffres clés"></section>
+
+    <div class="grid grid-2 section">
+      <section class="panel" aria-labelledby="h-road">
+        <div class="panel-head"><h2 id="h-road">En route <span id="road-count" class="muted"></span></h2><span class="muted">km restants · vitesse</span></div>
+        <div id="on-road" class="road"></div>
+      </section>
+      <section class="panel" aria-labelledby="h-rank">
+        <div class="panel-head"><h2 id="h-rank">Classement du mois</h2><span class="muted">km parcourus</span></div>
+        <div id="ranking" class="rank"></div>
+      </section>
+    </div>
+
+    <section class="section" aria-labelledby="h-recent">
+      <div class="panel-head"><h2 id="h-recent">Dernières livraisons</h2><a href="/livraisons">Toutes les livraisons →</a></div>
+      <div id="recent"></div>
+    </section>
+
+    <section class="section" aria-labelledby="h-drivers">
+      <h2 id="h-drivers">Chauffeurs</h2>
+      <div id="drivers"></div>
+    </section>
     <p class="updated" id="updated" aria-live="polite"></p>
-
-    <h2>En route</h2>
-    <div id="on-road"></div>
-
-    <h2>Dernières livraisons</h2>
-    <div id="recent"></div>
-    <p><a href="/livraisons">Toutes les livraisons →</a></p>
-
-    <h2>Nos chauffeurs</h2>
-    <div id="drivers"></div>
   </main>
 
   <footer class="site"><div class="wrap"><span data-company-name>VTC</span> · entreprise virtuelle sur Euro Truck Simulator 2</div></footer>

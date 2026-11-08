@@ -79,7 +79,9 @@ export function createApp({ db, config }) {
 
   app.use('/api/v1', api);
   // /admin → admin.html, /livraisons → livraisons.html, etc.
-  const staticFiles = express.static(WEB_DIR, { extensions: ['html'], maxAge: '5m' });
+  // Pas de cache long : le navigateur revalide chaque fichier (304 si inchangé),
+  // une nouvelle version du site est donc visible dès le rechargement.
+  const staticFiles = express.static(WEB_DIR, { extensions: ['html'], maxAge: 0 });
   // Feuille de style et visuels restent accessibles pour la page « accès refusé ».
   app.use((req, res, next) =>
     req.path === '/assets/style.css' || req.path.startsWith('/assets/brand/') ? staticFiles(req, res, next) : next(),

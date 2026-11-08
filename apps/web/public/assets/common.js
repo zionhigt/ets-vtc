@@ -34,6 +34,40 @@ export const fmt = {
     const [, unit] = steps.find(([limit]) => Math.abs(s) < limit);
     return rtf.format(Math.round(s / units[unit]), unit);
   },
+  /** 27720 → « 7 h 42 » ; 300 → « 5 min ». */
+  duration(seconds) {
+    if (seconds === null || seconds === undefined) return '–';
+    const m = Math.round(seconds / 60);
+    return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`;
+  },
+  /** Horloge façon chronotachygraphe : 27720 → « 7:42 ». */
+  clock(seconds) {
+    const m = Math.round((seconds ?? 0) / 60);
+    return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+  },
+  pct: (n) => (n === null || n === undefined ? '–' : `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n)} %`),
+};
+
+/** « Léa Moreau » → « LM ». */
+export const initials = (name) =>
+  String(name ?? '?')
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('') || '?';
+
+export const driverUrl = (id) => `/chauffeur?id=${encodeURIComponent(id)}`;
+
+const STATUS = {
+  delivered: ['LIVRÉ', 'good'],
+  in_progress: ['EN ROUTE', 'blue'],
+  cancelled: ['ANNULÉ', 'bad'],
+  interrupted: ['INTERROMPU', 'warn'],
+};
+export const statusBadge = (status) => {
+  const [label, kind] = STATUS[status] ?? [status, ''];
+  return el('span', { class: `badge ${kind}` }, label);
 };
 
 /** Crée un élément : el('td', { class: 'num' }, 'texte', autreElement). Le texte n'est jamais interprété comme du HTML. */
@@ -78,7 +112,7 @@ export function deliveryRow(d) {
     'tr',
     {},
     el('td', {}, fmt.date(d.endedAt ?? d.startedAt)),
-    el('td', {}, d.driver.name),
+    el('td', {}, el('a', { href: driverUrl(d.driver.id) }, d.driver.name)),
     el('td', {}, el('span', { class: 'route' }, `${d.from.city ?? '?'} → ${d.to.city ?? '?'}`, el('small', {}, `${d.from.company ?? ''} → ${d.to.company ?? ''}`))),
     el('td', {}, d.cargo ?? '–', d.cargoMass ? el('small', {}, ` (${fmt.int(d.cargoMass / 1000)} t)`) : null),
     el('td', { class: 'num' }, fmt.km(d.distanceKm ?? d.plannedDistanceKm)),
@@ -124,13 +158,15 @@ export function autoRefresh(render, { everyMs = 15_000, statusEl = null } = {}) 
   return tick();
 }
 
-export const DELIVERY_HEAD =['Date', 'Chauffeur', 'Trajet', 'Cargaison', 'Distance', 'Revenu', 'Amendes'];
+export const DELIVERY_HEAD = ['Date', 'Chauffeur', 'Trajet', 'Cargaison', 'Distance', 'Revenu', 'Amendes'];
+export const DELIVERY_NUM = [4, 5, 6];
 
-export function table(head, rows, emptyText) {
+/** Tableau : `num` liste les colonnes numériques (alignées à droite). */
+export function table(head, rows, emptyText, { num = head === DELIVERY_HEAD ? DELIVERY_NUM : [] } = {}) {
   if (!rows.length) return el('div', { class: 'card empty' }, emptyText);
   return el(
     'div',
     { class: 'table-wrap' },
-    el('table', {}, el('thead', {}, el('tr', {}, head.map((h, i) => el('th', { class: i >= 4 && head === DELIVERY_HEAD ? 'num' : null }, h)))), el('tbody', {}, rows)),
+    el('table', {}, el('thead', {}, el('tr', {}, head.map((h, i) => el('th', { class: num.includes(i) ? 'num' : null }, h)))), el('tbody', {}, rows)),
   );
 }

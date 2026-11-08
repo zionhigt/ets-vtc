@@ -154,7 +154,7 @@ export const JOBS_VERSION = '3';
 export async function ensureJobsUpToDate(db, log = () => {}) {
   const row = await db.get("SELECT meta_value FROM app_meta WHERE meta_key = 'jobs_version'");
   if (row?.meta_value === JOBS_VERSION) return false;
-  log(`règles des jobs v${row?.meta_value ?? 'aucune'} → v${JOBS_VERSION} : recalcul depuis le journal brut`);
+  log(`règles des jobs ${row ? `v${row.meta_value}` : 'jamais calculées'} → v${JOBS_VERSION} : recalcul depuis le journal brut`);
   const processed = await rebuildAll(db);
   const updated = await db.run("UPDATE app_meta SET meta_value = ? WHERE meta_key = 'jobs_version'", [JOBS_VERSION]);
   if (!updated.changes) await db.insertIgnore('app_meta', ['meta_key', 'meta_value'], [['jobs_version', JOBS_VERSION]]);

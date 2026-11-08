@@ -22,7 +22,7 @@ tools/             outils (rejeu de sessions NDJSON)
 docs/              guide de déploiement o2switch
 ```
 
-Pages du site : `/` (accueil), `/livraisons`, `/admin`.
+Pages du site : `/` (dispatch : chiffres du mois, chauffeurs en route en direct, classement), `/chauffeur?id=<n>` (vue cabine : compteur en direct, mission, temps de conduite, registre), `/livraisons`, `/admin`.
 
 Accès au site : par défaut (`SITE_ACCESS=restricted`), le site et l'API publique ne
 sont visibles qu'avec un lien d'accès, créé en ligne de commande
@@ -56,7 +56,7 @@ npm test
 | GET, PUT | `/admin/company` (identité de l'entreprise) | admin |
 | POST | `/admin/jobs/rebuild` (recalcule les livraisons) | admin |
 | GET | `/me/deliveries` | chauffeur |
-| GET | `/public/company`, `/public/stats`, `/public/deliveries`, `/public/drivers` | public |
+| GET | `/public/company`, `/public/stats`, `/public/deliveries`, `/public/drivers`, `/public/drivers/:id`, `/public/on-road` | public (lien d'accès) |
 
 Les routes protégées attendent `Authorization: Bearer <jeton d'accès>`.
 

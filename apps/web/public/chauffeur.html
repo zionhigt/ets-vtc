@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/assets/brand/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/assets/brand/favicon-192.png">
+  <link rel="apple-touch-icon" href="/assets/brand/favicon-192.png">
+  <title>Chauffeur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=Saira:ital,wght@1,800&family=Share+Tech+Mono&display=swap">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="module" src="/assets/driver.js"></script>
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="/">
+        <img data-company-logo hidden alt="">
+        <span>
+          <span class="brand-name" data-company-name>VTC</span><br>
+          <span class="brand-slogan" data-company-slogan hidden></span>
+        </span>
+      </a>
+      <nav class="site">
+        <a href="/">Accueil</a>
+        <a href="/livraisons">Livraisons</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="not-found" class="card empty" hidden>Chauffeur introuvable. <a href="/">Retour à l'accueil</a></div>
+
+    <div id="dashboard" hidden>
+      <div class="cab-head">
+        <span class="avatar" id="avatar"></span>
+        <div>
+          <h1 id="name"></h1>
+          <div class="muted" id="subtitle"></div>
+        </div>
+        <div class="status" id="status"></div>
+      </div>
+
+      <div class="cab-grid">
+        <section class="panel" aria-label="Compteur">
+          <div id="gauge"></div>
+          <div class="gauge-meta"><span>RÉGIME · <b id="rpm">–</b> TR/MIN</span><span>RAPPORT <b id="gear">–</b></span></div>
+          <div class="meter-bar" id="rpm-bar" aria-hidden="true"></div>
+          <p class="offline-note" id="offline-note" hidden></p>
+        </section>
+
+        <section class="panel" aria-labelledby="h-mission">
+          <div class="panel-head"><h2 id="h-mission">Mission en cours</h2><span class="muted" id="mission-ref"></span></div>
+          <div id="mission"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="h-chrono">
+          <div class="panel-head"><h2 id="h-chrono">Temps de conduite</h2><span class="muted">règles UE</span></div>
+          <div class="chrono-time" id="chrono-today">0:00</div>
+          <div class="chrono-sub">AUJOURD'HUI · LIMITE 9:00</div>
+          <div id="chrono-meters"></div>
+          <p class="muted" style="font-size:12px;margin:0">Mesuré quand le camion roule, jeu non en pause. Semaine : 7 jours glissants.</p>
+        </section>
+      </div>
+
+      <div class="cab-grid-2">
+        <section class="panel" aria-labelledby="h-tanks">
+          <div class="panel-head"><h2 id="h-tanks">Réservoirs</h2><span class="muted" id="truck"></span></div>
+          <div class="tank" id="tanks"></div>
+        </section>
+        <section class="panel" aria-labelledby="h-month">
+          <div class="panel-head"><h2 id="h-month">Ce mois-ci</h2><span class="muted" id="month-rank"></span></div>
+          <div class="stats-row" id="month"></div>
+        </section>
+        <section class="panel" aria-labelledby="h-rank">
+          <div class="panel-head"><h2 id="h-rank">Classement</h2><span class="muted">km du mois</span></div>
+          <div class="rank" id="ranking"></div>
+        </section>
+        <section class="panel" aria-labelledby="h-total">
+          <div class="panel-head"><h2 id="h-total">Carrière</h2></div>
+          <div class="stats-row" id="total"></div>
+        </section>
+      </div>
+
+      <section class="section" aria-labelledby="h-log">
+        <h2 id="h-log">Registre des livraisons</h2>
+        <div id="log"></div>
+      </section>
+      <p class="updated" id="updated" aria-live="polite"></p>
+    </div>
+  </main>
+
+  <footer class="site"><div class="wrap"><span data-company-name>VTC</span> · entreprise virtuelle sur Euro Truck Simulator 2</div></footer>
+</body>
+</html>
