@@ -22,6 +22,9 @@ function testDbConfig() {
 const TABLES = [
   'driving_state',
   'driving_days',
+  'daily_activity',
+  'live_state',
+  'app_meta',
   'site_links',
   'company_settings',
   'job_cursors',

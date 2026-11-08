@@ -24,7 +24,7 @@ async function driver(username) {
 
 const T0 = Date.UTC(2026, 10, 8, 23, 59, 0);
 const km = async (userId) => {
-  const rows = await t.db.all('SELECT day, distance_km FROM driving_days WHERE user_id = ? ORDER BY day', [userId]);
+  const rows = await t.db.all('SELECT day, distance_km FROM daily_activity WHERE user_id = ? ORDER BY day', [userId]);
   return rows.map((r) => [r.day, Math.round(Number(r.distance_km) * 1000) / 1000]);
 };
 
@@ -58,8 +58,8 @@ test('changement de camion, compteur qui recule ou jeu non chargé : rien compt�
 });
 
 test('le recalcul complet redonne le même kilométrage', async () => {
-  const before = await t.db.all('SELECT user_id, day, distance_km FROM driving_days ORDER BY user_id, day');
+  const before = await t.db.all('SELECT user_id, day, distance_km FROM daily_activity ORDER BY user_id, day');
   assert.equal((await t.call('POST', '/admin/jobs/rebuild', { token: admin })).status, 200);
-  const after = await t.db.all('SELECT user_id, day, distance_km FROM driving_days ORDER BY user_id, day');
+  const after = await t.db.all('SELECT user_id, day, distance_km FROM daily_activity ORDER BY user_id, day');
   assert.deepEqual(after, before);
 });

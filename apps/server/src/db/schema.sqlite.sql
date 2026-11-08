@@ -110,16 +110,31 @@ CREATE TABLE IF NOT EXISTS site_links (
   revoked_at INTEGER
 );
 
--- Kilométrage réel (compteur du camion), y compris hors mission, par jour (UTC).
-CREATE TABLE IF NOT EXISTS driving_days (
-  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  day TEXT NOT NULL,
-  distance_km REAL NOT NULL DEFAULT 0,
-  PRIMARY KEY (user_id, day)
-);
 
 CREATE TABLE IF NOT EXISTS driving_state (
   user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   last_odometer REAL NOT NULL,
   last_ts INTEGER NOT NULL
+);
+
+-- Activité quotidienne (remplace driving_days) : km au compteur et temps de conduite, par jour UTC.
+CREATE TABLE IF NOT EXISTS daily_activity (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day TEXT NOT NULL,
+  distance_km REAL NOT NULL DEFAULT 0,
+  driving_s INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, day)
+);
+
+-- Dernier état connu de chaque chauffeur (snapshot réduit), pour l'affichage en direct.
+CREATE TABLE IF NOT EXISTS live_state (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  ts INTEGER NOT NULL,
+  data TEXT NOT NULL
+);
+
+-- Métadonnées (version des règles des jobs : un changement déclenche un recalcul).
+CREATE TABLE IF NOT EXISTS app_meta (
+  meta_key TEXT PRIMARY KEY,
+  meta_value TEXT
 );

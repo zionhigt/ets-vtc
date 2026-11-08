@@ -113,18 +113,34 @@ CREATE TABLE IF NOT EXISTS site_links (
   revoked_at BIGINT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Kilométrage réel (compteur du camion), y compris hors mission, par jour (UTC).
-CREATE TABLE IF NOT EXISTS driving_days (
-  user_id INT UNSIGNED NOT NULL,
-  day CHAR(10) NOT NULL,
-  distance_km DOUBLE NOT NULL DEFAULT 0,
-  PRIMARY KEY (user_id, day),
-  CONSTRAINT fk_dd_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS driving_state (
   user_id INT UNSIGNED NOT NULL PRIMARY KEY,
   last_odometer DOUBLE NOT NULL,
   last_ts BIGINT NOT NULL,
   CONSTRAINT fk_ds_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Activité quotidienne (remplace driving_days) : km au compteur et temps de conduite, par jour UTC.
+CREATE TABLE IF NOT EXISTS daily_activity (
+  user_id INT UNSIGNED NOT NULL,
+  day CHAR(10) NOT NULL,
+  distance_km DOUBLE NOT NULL DEFAULT 0,
+  driving_s INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, day),
+  CONSTRAINT fk_da_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dernier état connu de chaque chauffeur (snapshot réduit), pour l'affichage en direct.
+CREATE TABLE IF NOT EXISTS live_state (
+  user_id INT UNSIGNED NOT NULL PRIMARY KEY,
+  ts BIGINT NOT NULL,
+  data TEXT NOT NULL,
+  CONSTRAINT fk_ls_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Métadonnées (version des règles des jobs : un changement déclenche un recalcul).
+CREATE TABLE IF NOT EXISTS app_meta (
+  meta_key VARCHAR(64) NOT NULL PRIMARY KEY,
+  meta_value TEXT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

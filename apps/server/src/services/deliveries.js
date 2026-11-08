@@ -145,11 +145,29 @@ async function processUserNow(db, userId) {
   return processed;
 }
 
-/** Recalcule livraisons et kilométrage depuis le journal brut. */
+/**
+ * Version des règles des jobs. À incrémenter quand un job change ce qu'il
+ * produit : au démarrage, le serveur recalcule alors tout depuis le journal brut.
+ */
+export const JOBS_VERSION = '3';
+
+export async function ensureJobsUpToDate(db, log = () => {}) {
+  const row = await db.get("SELECT meta_value FROM app_meta WHERE meta_key = 'jobs_version'");
+  if (row?.meta_value === JOBS_VERSION) return false;
+  log(`règles des jobs v${row?.meta_value ?? 'aucune'} → v${JOBS_VERSION} : recalcul depuis le journal brut`);
+  const processed = await rebuildAll(db);
+  const updated = await db.run("UPDATE app_meta SET meta_value = ? WHERE meta_key = 'jobs_version'", [JOBS_VERSION]);
+  if (!updated.changes) await db.insertIgnore('app_meta', ['meta_key', 'meta_value'], [['jobs_version', JOBS_VERSION]]);
+  log(`recalcul terminé (${processed} événements)`);
+  return true;
+}
+
+/** Recalcule livraisons, activité et état en direct depuis le journal brut. */
 export async function rebuildAll(db) {
   await db.run('DELETE FROM deliveries');
-  await db.run('DELETE FROM driving_days');
+  await db.run('DELETE FROM daily_activity');
   await db.run('DELETE FROM driving_state');
+  await db.run('DELETE FROM live_state');
   await db.run('DELETE FROM job_cursors');
   const users = await db.all('SELECT id FROM users ORDER BY id');
   let processed = 0;
