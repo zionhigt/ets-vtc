@@ -52,3 +52,52 @@ CREATE TABLE IF NOT EXISTS audit_log (
   details TEXT NULL,
   created_at BIGINT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Phase 1 : livraisons reconstituées depuis le journal brut, identité de l'entreprise.
+
+CREATE TABLE IF NOT EXISTS deliveries (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  status ENUM('in_progress', 'delivered', 'cancelled', 'interrupted') NOT NULL,
+  source_event_id VARCHAR(64) NOT NULL,
+  started_at BIGINT NOT NULL,
+  ended_at BIGINT NULL,
+  cargo VARCHAR(128) NULL,
+  cargo_id VARCHAR(64) NULL,
+  cargo_mass DOUBLE NULL,
+  city_src VARCHAR(128) NULL,
+  city_src_id VARCHAR(64) NULL,
+  city_dst VARCHAR(128) NULL,
+  city_dst_id VARCHAR(64) NULL,
+  company_src VARCHAR(128) NULL,
+  company_dst VARCHAR(128) NULL,
+  job_market VARCHAR(64) NULL,
+  special_job TINYINT(1) NOT NULL DEFAULT 0,
+  planned_distance_km DOUBLE NULL,
+  income DOUBLE NULL,
+  revenue DOUBLE NULL,
+  distance_km DOUBLE NULL,
+  delivery_time_min DOUBLE NULL,
+  earned_xp DOUBLE NULL,
+  cargo_damage DOUBLE NULL,
+  autopark TINYINT(1) NULL,
+  autoload TINYINT(1) NULL,
+  cancel_penalty DOUBLE NULL,
+  fines_count INT NOT NULL DEFAULT 0,
+  fines_total DOUBLE NOT NULL DEFAULT 0,
+  tolls_total DOUBLE NOT NULL DEFAULT 0,
+  UNIQUE KEY uq_deliveries_source (user_id, source_event_id),
+  KEY idx_deliveries_status_end (status, ended_at),
+  CONSTRAINT fk_dl_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS job_cursors (
+  user_id INT UNSIGNED NOT NULL PRIMARY KEY,
+  last_raw_id BIGINT UNSIGNED NOT NULL,
+  CONSTRAINT fk_jc_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS company_settings (
+  setting_key VARCHAR(64) NOT NULL PRIMARY KEY,
+  setting_value TEXT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Livraisons</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="module" src="/assets/deliveries.js"></script>
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="/">
+        <img data-company-logo hidden alt="">
+        <span>
+          <span class="brand-name" data-company-name>VTC</span><br>
+          <span class="brand-slogan" data-company-slogan hidden></span>
+        </span>
+      </a>
+      <nav class="site">
+        <a href="/">Accueil</a>
+        <a href="/livraisons" aria-current="page">Livraisons</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>Livraisons</h1>
+    <p class="lead">Toutes les missions livrées par les chauffeurs, de la plus récente à la plus ancienne.</p>
+
+    <form id="filter" class="card" style="margin-bottom:16px">
+      <div class="grid">
+        <div class="row">
+          <label for="driver">Chauffeur</label>
+          <select id="driver" name="driver"><option value="">Tous les chauffeurs</option></select>
+        </div>
+      </div>
+    </form>
+
+    <div id="list"></div>
+    <div class="pager"><button class="secondary" id="more" hidden>Charger plus</button></div>
+  </main>
+
+  <footer class="site"><div class="wrap"><span data-company-name>VTC</span> · entreprise virtuelle sur Euro Truck Simulator 2</div></footer>
+</body>
+</html>

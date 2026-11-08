@@ -12,6 +12,20 @@ import {
   regeneratePersonalToken,
 } from '../services/users.js';
 import { eventStats } from '../services/events.js';
+import { getCompany, updateCompany } from '../services/company.js';
+import { rebuildAll } from '../services/deliveries.js';
+import { audit } from '../services/users.js';
+
+const companyBody = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    slogan: z.string().trim().max(160),
+    description: z.string().trim().max(4000),
+    primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'couleur au format #rrggbb'),
+    logoUrl: z.union([z.literal(''), z.string().url().max(500).startsWith('https://', 'logo en https')]),
+  })
+  .partial()
+  .refine((p) => Object.keys(p).length > 0, 'aucun champ à modifier');
 
 const role = z.enum(['admin', 'driver']);
 const createBody = z.object({
@@ -65,6 +79,19 @@ export function adminRoutes(db, config) {
     const user = await loadUser(req);
     await deleteUser(db, user.id, req.user.id);
     res.status(204).end();
+  });
+
+  r.get('/company', async (_req, res) => res.json(await getCompany(db)));
+
+  r.put('/company', async (req, res) => {
+    res.json(await updateCompany(db, parse(companyBody, req.body), req.user.id));
+  });
+
+  // Recalcule toutes les livraisons depuis le journal brut (après une évolution des règles).
+  r.post('/jobs/rebuild', async (req, res) => {
+    const processed = await rebuildAll(db);
+    await audit(db, req.user.id, 'jobs.rebuild', 'deliveries', { processed });
+    res.json({ processed });
   });
 
   // Révoque les tokens du compte et en émet un nouveau.

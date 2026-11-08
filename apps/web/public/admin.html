@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Administration</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script type="module" src="/assets/admin.js"></script>
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="/">
+        <img data-company-logo hidden alt="">
+        <span><span class="brand-name" data-company-name>VTC</span><br><span class="brand-slogan">Administration</span></span>
+      </a>
+      <nav class="site">
+        <a href="/">Voir le site</a>
+        <button class="secondary" id="logout" hidden>Se déconnecter</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="message" hidden></div>
+
+    <section id="login-view" hidden>
+      <h1>Connexion</h1>
+      <p class="lead">Colle ton token personnel d'administrateur.</p>
+      <form id="login" class="card">
+        <div class="row">
+          <label for="login-token">Token personnel</label>
+          <input id="login-token" name="token" type="password" autocomplete="off" required placeholder="vtc_…">
+        </div>
+        <button type="submit">Se connecter</button>
+      </form>
+    </section>
+
+    <section id="admin-view" hidden>
+      <h1>Administration</h1>
+      <p class="lead">Connecté en tant que <strong id="me"></strong>.</p>
+
+      <h2>Chauffeurs</h2>
+      <div id="token-panel" hidden></div>
+      <div id="users"></div>
+
+      <h2>Ajouter un compte</h2>
+      <form id="create" class="card">
+        <div class="grid">
+          <div class="row">
+            <label for="c-display">Nom affiché sur le site</label>
+            <input id="c-display" name="displayName" required maxlength="128" placeholder="Séb">
+          </div>
+          <div class="row">
+            <label for="c-username">Identifiant (minuscules, chiffres, . _ -)</label>
+            <input id="c-username" name="username" required pattern="[a-z0-9._\-]{2,64}" placeholder="seb">
+          </div>
+          <div class="row">
+            <label for="c-role">Rôle</label>
+            <select id="c-role" name="role"><option value="driver">Chauffeur</option><option value="admin">Administrateur</option></select>
+          </div>
+        </div>
+        <button type="submit">Créer le compte et son token</button>
+      </form>
+
+      <h2>Identité de l'entreprise</h2>
+      <form id="company" class="card">
+        <div class="grid">
+          <div class="row"><label for="co-name">Nom</label><input id="co-name" name="name" required maxlength="80"></div>
+          <div class="row"><label for="co-slogan">Slogan</label><input id="co-slogan" name="slogan" maxlength="160"></div>
+          <div class="row"><label for="co-color">Couleur principale</label><input id="co-color" name="primaryColor" type="color"></div>
+          <div class="row"><label for="co-logo">URL du logo (https)</label><input id="co-logo" name="logoUrl" type="url" placeholder="https://…"></div>
+        </div>
+        <div class="row"><label for="co-desc">Présentation</label><textarea id="co-desc" name="description" maxlength="4000"></textarea></div>
+        <button type="submit">Enregistrer</button>
+      </form>
+
+      <h2>Maintenance</h2>
+      <div class="card">
+        <p style="margin-top:0">Recalcule toutes les livraisons à partir des événements reçus. Utile après une mise à jour des règles.</p>
+        <button class="secondary" id="rebuild">Recalculer les livraisons</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

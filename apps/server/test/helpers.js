@@ -19,7 +19,16 @@ function testDbConfig() {
   };
 }
 
-const TABLES = ['audit_log', 'raw_events', 'refresh_tokens', 'personal_tokens', 'users'];
+const TABLES = [
+  'company_settings',
+  'job_cursors',
+  'deliveries',
+  'audit_log',
+  'raw_events',
+  'refresh_tokens',
+  'personal_tokens',
+  'users',
+];
 
 /** Démarre l'API sur un port libre avec une base de test vierge. */
 export async function startTestServer(configOverrides = {}) {

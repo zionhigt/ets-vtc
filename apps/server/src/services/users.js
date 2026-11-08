@@ -91,6 +91,8 @@ export async function deleteUser(db, userId, actorId = null) {
   const user = await getUser(db, userId);
   if (!user) throw new HttpError(404, 'user_not_found');
   // Suppressions explicites : ne dépend pas de l'activation des clés étrangères.
+  await db.run('DELETE FROM deliveries WHERE user_id = ?', [userId]);
+  await db.run('DELETE FROM job_cursors WHERE user_id = ?', [userId]);
   await db.run('DELETE FROM raw_events WHERE user_id = ?', [userId]);
   await db.run('DELETE FROM refresh_tokens WHERE user_id = ?', [userId]);
   await db.run('DELETE FROM personal_tokens WHERE user_id = ?', [userId]);
