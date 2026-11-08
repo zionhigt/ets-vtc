@@ -22,7 +22,7 @@ const event = z.object({
 
 const batch = z.object({ events: z.array(event).min(1).max(MAX_BATCH_SIZE) });
 
-export function telemetryRoutes(db, config) {
+export function telemetryRoutes(db, config, changes) {
   const r = Router();
   const driver = requireAuth(db, config);
 
@@ -38,6 +38,8 @@ export function telemetryRoutes(db, config) {
         console.error(`[jobs] livraisons de l'utilisateur ${req.user.id} :`, err);
       }
     }
+    // Une seule notification par lot : le site se redessine au rythme du tracker.
+    if (result.accepted) changes?.notify();
     res.json(result);
   });
 

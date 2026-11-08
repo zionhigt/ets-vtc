@@ -226,4 +226,4 @@ async function load() {
 }
 
 if (!id) $('not-found').hidden = false;
-else autoRefresh(load, { everyMs: 5_000, statusEl: $('updated') });
+else autoRefresh(load, { statusEl: $('updated') });

@@ -99,4 +99,4 @@ async function render() {
   );
 }
 
-autoRefresh(render, { everyMs: 10_000, statusEl: $('updated') });
+autoRefresh(render, { statusEl: $('updated') });

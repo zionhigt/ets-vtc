@@ -53,4 +53,4 @@ select.addEventListener('change', () => {
 });
 more.addEventListener('click', () => loadMore());
 
-autoRefresh(refreshTop, { everyMs: 20_000, statusEl: document.getElementById('updated') });
+autoRefresh(refreshTop, { statusEl: document.getElementById('updated') });

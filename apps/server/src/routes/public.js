@@ -12,8 +12,10 @@ const deliveriesQuery = z.object({
 });
 const idParam = z.coerce.number().int().positive();
 
+const changesQuery = z.object({ since: z.coerce.number().int().nonnegative().default(0) });
+
 /** Données publiques du site : aucune authentification (hors accès restreint au site). */
-export function publicRoutes(db) {
+export function publicRoutes(db, changes) {
   const r = Router();
 
   r.get('/company', async (_req, res) => res.json(await getCompany(db)));
@@ -36,6 +38,17 @@ export function publicRoutes(db) {
 
   // Missions en cours, avec l'état en direct de chaque chauffeur.
   r.get('/on-road', async (_req, res) => res.json(await onRoad(db)));
+
+  // Long polling : répond dès qu'un nouveau lot est arrivé (version différente
+  // de `since`), sinon au bout de 25 s. La page se redessine puis rappelle.
+  r.get('/changes', async (req, res) => {
+    const { since } = parse(changesQuery, req.query);
+    const aborted = new AbortController();
+    // Visiteur parti (onglet fermé, rechargement) : on libère l'attente.
+    res.on('close', () => aborted.abort());
+    const version = await changes.wait(since, { signal: aborted.signal });
+    if (!aborted.signal.aborted) res.set('Cache-Control', 'no-store').json({ version });
+  });
 
   return r;
 }

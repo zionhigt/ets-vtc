@@ -122,40 +122,63 @@ export function deliveryRow(d) {
 }
 
 /**
- * Rafraîchissement périodique (polling court) : sur l'hébergement mutualisé,
- * les connexions longues (SSE, long polling) passent mal derrière Passenger.
- * En pause quand l'onglet est masqué ; rafraîchit dès qu'il redevient visible.
+ * Actualisation au rythme des données (long polling) : la page attend que le
+ * serveur reçoive un nouveau lot du tracker, puis se redessine une fois.
+ * Le serveur répond au plus tard après 25 s même sans nouveauté.
+ * En pause quand l'onglet est masqué ; resynchronisation dès qu'il revient.
+ * En cas d'erreur, nouvel essai après `everyMs`.
  */
-export function autoRefresh(render, { everyMs = 15_000, statusEl = null } = {}) {
-  let timer = null;
-  let running = false;
-  let lastOk = null;
+export function autoRefresh(render, { everyMs = 5_000, statusEl = null } = {}) {
+  let version = 0;
+  let controller = null;
   const showStatus = (error) => {
     if (!statusEl) return;
     statusEl.textContent = error
       ? `Mise à jour impossible (${error}) : nouvel essai dans ${everyMs / 1000} s`
-      : `Mis à jour à ${new Date(lastOk).toLocaleTimeString('fr-FR')} · actualisation toutes les ${everyMs / 1000} s`;
+      : `En direct · mis à jour à ${new Date().toLocaleTimeString('fr-FR')}`;
     statusEl.classList.toggle('stale', Boolean(error));
   };
-  async function tick() {
-    clearTimeout(timer);
-    if (document.visibilityState !== 'visible') return;
-    if (!running) {
-      running = true;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  async function loop() {
+    while (document.visibilityState === 'visible') {
+      controller = new AbortController();
       try {
-        await render();
-        lastOk = Date.now();
+        const res = await fetch(`${API}/public/changes?since=${version}`, { signal: controller.signal, cache: 'no-store' });
+        if (!res.ok) throw new Error(`${res.status}`);
+        const next = (await res.json()).version;
+        if (next !== version) {
+          await render();
+          version = next; // seulement après un rendu réussi
+        }
         showStatus(null);
       } catch (err) {
+        if (controller.signal.aborted) break;
         showStatus(err.message);
-      } finally {
-        running = false;
+        await sleep(everyMs);
       }
     }
-    timer = setTimeout(tick, everyMs);
   }
-  document.addEventListener('visibilitychange', tick);
-  return tick();
+  // Une seule boucle à la fois ; relancée si l'onglet est redevenu visible entre-temps.
+  let current = null;
+  function start() {
+    if (current) return current;
+    current = loop().finally(() => {
+      current = null;
+      if (document.visibilityState === 'visible') start();
+    });
+    return current;
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      version = 0; // retour sur l'onglet : redessine tout de suite
+      start();
+    } else {
+      controller?.abort();
+    }
+  });
+  return start();
 }
 
 export const DELIVERY_HEAD = ['Date', 'Chauffeur', 'Trajet', 'Cargaison', 'Distance', 'Revenu', 'Amendes'];

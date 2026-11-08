@@ -57,6 +57,7 @@ npm test
 | POST | `/admin/jobs/rebuild` (recalcule les livraisons) | admin |
 | GET | `/me/deliveries` | chauffeur |
 | GET | `/public/company`, `/public/stats`, `/public/deliveries`, `/public/drivers`, `/public/drivers/:id`, `/public/on-road` | public (lien d'accès) |
+| GET | `/public/changes?since=<version>` : long polling, répond à l'arrivée d'un lot (25 s max) | public (lien d'accès) |
 
 Les routes protégées attendent `Authorization: Bearer <jeton d'accès>`.
 

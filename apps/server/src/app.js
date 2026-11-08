@@ -9,6 +9,7 @@ import { adminRoutes } from './routes/admin.js';
 import { publicRoutes } from './routes/public.js';
 import { errorHandler } from './http.js';
 import { siteAccess } from './services/site-access.js';
+import { ChangeFeed } from './services/changes.js';
 
 export const API_VERSION = '0.2.0';
 
@@ -16,7 +17,7 @@ export const API_VERSION = '0.2.0';
 const WEB_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../web/public');
 
 /** Construit l'application Express (sans écouter de port : testable). */
-export function createApp({ db, config }) {
+export function createApp({ db, config, changes = new ChangeFeed() }) {
   const app = express();
   app.disable('x-powered-by');
   if (config.trustProxy) app.set('trust proxy', config.trustProxy);
@@ -67,14 +68,14 @@ export function createApp({ db, config }) {
   app.get('/acces/:token', limiter(20), (req, res) => access.enter(req, res, denied));
 
   api.use('/auth', limiter(20), authRoutes(db, config));
-  api.use('/admin', limiter(120), adminRoutes(db, config));
+  api.use('/admin', limiter(120), adminRoutes(db, config, changes));
   api.use(
     '/public',
     limiter(300),
     gate((_req, res) => res.status(401).json({ error: 'site_access_required', message: "Lien d'accès requis" })),
-    publicRoutes(db),
+    publicRoutes(db, changes),
   );
-  api.use(limiter(300), telemetryRoutes(db, config));
+  api.use(limiter(300), telemetryRoutes(db, config, changes));
   api.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 
   app.use('/api/v1', api);

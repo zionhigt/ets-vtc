@@ -43,7 +43,7 @@ const patchBody = z
   .refine((p) => Object.keys(p).length > 0, 'aucun champ à modifier');
 const idParam = z.coerce.number().int().positive();
 
-export function adminRoutes(db, config) {
+export function adminRoutes(db, config, changes) {
   const r = Router();
   r.use(requireAuth(db, config, 'admin'));
 
@@ -84,13 +84,16 @@ export function adminRoutes(db, config) {
   r.get('/company', async (_req, res) => res.json(await getCompany(db)));
 
   r.put('/company', async (req, res) => {
-    res.json(await updateCompany(db, parse(companyBody, req.body), req.user.id));
+    const company = await updateCompany(db, parse(companyBody, req.body), req.user.id);
+    changes?.notify();
+    res.json(company);
   });
 
   // Recalcule toutes les livraisons depuis le journal brut (après une évolution des règles).
   r.post('/jobs/rebuild', async (req, res) => {
     const processed = await rebuildAll(db);
     await audit(db, req.user.id, 'jobs.rebuild', 'deliveries', { processed });
+    changes?.notify();
     res.json({ processed });
   });
 
