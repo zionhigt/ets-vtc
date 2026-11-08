@@ -8,6 +8,9 @@ name: Tracker
 
 on:
   push:
+    # Sans « branches », un déclencheur qui liste des tags ignore les pushs de branche.
+    branches:
+      - main
     paths:
       - 'apps/tracker/**'
       - 'packages/shared/**'
