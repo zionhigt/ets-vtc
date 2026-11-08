@@ -28,17 +28,16 @@ const companyBody = z
   .refine((p) => Object.keys(p).length > 0, 'aucun champ à modifier');
 
 const role = z.enum(['admin', 'driver']);
-const createBody = z.object({
-  username: z
-    .string()
-    .min(2)
-    .max(64)
-    .regex(/^[a-z0-9._-]+$/, 'minuscules, chiffres, . _ - uniquement'),
-  displayName: z.string().min(1).max(128),
-  role: role.default('driver'),
-});
+const username = z
+  .string()
+  .trim()
+  .min(2)
+  .max(64)
+  .regex(/^[a-z0-9._-]+$/, 'minuscules, chiffres, . _ - uniquement');
+const displayName = z.string().trim().min(1).max(128);
+const createBody = z.object({ username, displayName, role: role.default('driver') });
 const patchBody = z
-  .object({ displayName: z.string().min(1).max(128), role, active: z.boolean() })
+  .object({ username, displayName, role, active: z.boolean() })
   .partial()
   .refine((p) => Object.keys(p).length > 0, 'aucun champ à modifier');
 const idParam = z.coerce.number().int().positive();
@@ -72,6 +71,7 @@ export function adminRoutes(db, config, changes) {
   r.patch('/users/:id', async (req, res) => {
     const user = await loadUser(req);
     const updated = await updateUser(db, user.id, parse(patchBody, req.body), req.user.id);
+    changes?.notify(); // nom ou statut visibles sur le site
     res.json(publicUser(updated));
   });
 

@@ -111,6 +111,60 @@ function showToken(user, token) {
   panel.hidden = false;
 }
 
+const roleLabel = (r) => (r === 'admin' ? 'Administrateur' : 'Chauffeur');
+
+/** Ligne en mode édition : nom affiché, identifiant et rôle. */
+function editRow(u) {
+  const self = u.id === memory.user.id;
+  const name = el('input', { value: u.displayName, required: true, maxlength: '128', 'aria-label': 'Nom affiché' });
+  const login = el('input', { value: u.username, required: true, pattern: '[a-z0-9._\\-]{2,64}', 'aria-label': 'Identifiant' });
+  const role = el(
+    'select',
+    { 'aria-label': 'Rôle', disabled: self || undefined, title: self ? 'Tu ne peux pas changer ton propre rôle' : undefined },
+    ['driver', 'admin'].map((r) => el('option', { value: r, selected: r === u.role || undefined }, roleLabel(r))),
+  );
+  const form = el('form', { id: `edit-${u.id}` });
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const patch = {};
+    if (name.value.trim() !== u.displayName) patch.displayName = name.value.trim();
+    if (login.value.trim() !== u.username) patch.username = login.value.trim();
+    if (!self && role.value !== u.role) patch.role = role.value;
+    if (!Object.keys(patch).length) return loadUsers();
+    try {
+      const updated = await api('PATCH', `/admin/users/${u.id}`, patch);
+      if (self) {
+        memory.user = { ...memory.user, displayName: updated.displayName, username: updated.username };
+        store.set(memory);
+        $('me').textContent = updated.displayName;
+      }
+      show(`${updated.displayName} : modifications enregistrées.`);
+      loadUsers();
+    } catch (err) {
+      show(err.message, 'error');
+    }
+  });
+  for (const input of [name, login, role]) input.setAttribute('form', form.id);
+  return el(
+    'tr',
+    {},
+    el('td', {}, form, el('div', { class: 'edit-cell' }, name, login)),
+    el('td', {}, role),
+    el('td', {}, el('span', { class: `badge ${u.active ? 'good' : 'bad'}` }, u.active ? 'Actif' : 'Désactivé')),
+    el('td', {}, fmt.date(u.createdAt)),
+    el(
+      'td',
+      {},
+      el(
+        'div',
+        { class: 'actions' },
+        el('button', { type: 'submit', form: form.id }, 'Enregistrer'),
+        el('button', { type: 'button', class: 'secondary', onclick: () => loadUsers() }, 'Annuler'),
+      ),
+    ),
+  );
+}
+
 async function loadUsers() {
   const users = await api('GET', '/admin/users');
   const rows = users.map((u) =>
@@ -118,7 +172,7 @@ async function loadUsers() {
       'tr',
       {},
       el('td', {}, u.displayName, el('br'), el('small', { class: 'brand-slogan' }, u.username)),
-      el('td', {}, u.role === 'admin' ? 'Administrateur' : 'Chauffeur'),
+      el('td', {}, roleLabel(u.role)),
       el('td', {}, el('span', { class: `badge ${u.active ? 'good' : 'bad'}` }, u.active ? 'Actif' : 'Désactivé')),
       el('td', {}, fmt.date(u.createdAt)),
       el(
@@ -127,6 +181,15 @@ async function loadUsers() {
         el(
           'div',
           { class: 'actions' },
+          el(
+            'button',
+            {
+              type: 'button',
+              class: 'secondary',
+              onclick: (e) => e.target.closest('tr').replaceWith(editRow(u)),
+            },
+            'Modifier',
+          ),
           u.id === memory.user.id
             ? el('small', { class: 'brand-slogan' }, 'toi')
             : [

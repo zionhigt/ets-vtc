@@ -99,6 +99,7 @@ n'est pas signé) : *Informations complémentaires* → *Exécuter quand même*.
 
 | Besoin | Action |
 | --- | --- |
+| Changer un pseudo, un identifiant ou un rôle | **Modifier** sur sa ligne, puis **Enregistrer** : le nouveau nom s'affiche aussitôt sur le site, tout l'historique suit, le token ne change pas |
 | Token perdu, ou divulgué | **Nouveau token** (deux clics) : l'ancien est révoqué, son tracker est déconnecté ; transmettre le nouveau |
 | Pause d'un chauffeur | **Désactiver** : il disparaît du site, son tracker ne peut plus envoyer ; **Réactiver** pour revenir |
 | Départ définitif | **Supprimer** (deux clics) : le compte et toutes ses données sont effacés, sans retour possible |

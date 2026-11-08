@@ -83,6 +83,27 @@ test('un compte désactivé perd l\'accès immédiatement', async () => {
   assert.equal((await t.call('POST', '/auth/token', { body: { token: body.personalToken } })).status, 401);
 });
 
+test("l'admin modifie le pseudo et l'identifiant d'un chauffeur, sans toucher à son token", async () => {
+  const { body } = await t.call('POST', '/admin/users', { token: admin, body: { username: 'paul', displayName: 'Paul' } });
+  await t.call('POST', '/admin/users', { token: admin, body: { username: 'pierre', displayName: 'Pierre' } });
+  const r = await t.call('PATCH', `/admin/users/${body.user.id}`, {
+    token: admin,
+    body: { displayName: '  Paulo le Routier ', username: 'paulo' },
+  });
+  assert.equal(r.status, 200);
+  assert.equal(r.body.displayName, 'Paulo le Routier');
+  assert.equal(r.body.username, 'paulo');
+  const drivers = await t.call('GET', '/public/drivers');
+  assert.ok((Array.isArray(drivers.body) ? drivers.body : drivers.body.drivers).some((d) => d.name === 'Paulo le Routier'));
+  // Le token reste valide après le renommage.
+  assert.equal((await t.login(body.personalToken)).user.displayName, 'Paulo le Routier');
+
+  const taken = await t.call('PATCH', `/admin/users/${body.user.id}`, { token: admin, body: { username: 'pierre' } });
+  assert.equal(taken.status, 409);
+  const empty = await t.call('PATCH', `/admin/users/${body.user.id}`, { token: admin, body: { displayName: '   ' } });
+  assert.equal(empty.status, 400);
+});
+
 test("l'admin ne peut ni se désactiver ni se supprimer", async () => {
   const me = await t.call('GET', '/me', { token: admin });
   assert.equal((await t.call('PATCH', `/admin/users/${me.body.id}`, { token: admin, body: { active: false } })).status, 400);

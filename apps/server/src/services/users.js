@@ -69,7 +69,12 @@ export async function updateUser(db, userId, patch, actorId = null) {
   if (actorId === userId && (patch.active === false || (patch.role && patch.role !== user.role))) {
     throw new HttpError(400, 'cannot_demote_self', 'Un admin ne peut ni se désactiver ni changer son propre rôle');
   }
+  if (patch.username !== undefined && patch.username !== user.username) {
+    const taken = await db.get('SELECT id FROM users WHERE username = ? AND id <> ?', [patch.username, userId]);
+    if (taken) throw new HttpError(409, 'username_taken', "Ce nom d'utilisateur existe déjà");
+  }
   const set = {};
+  if (patch.username !== undefined) set.username = patch.username;
   if (patch.displayName !== undefined) set.display_name = patch.displayName;
   if (patch.role !== undefined) set.role = patch.role;
   if (patch.active !== undefined) set.active = patch.active ? 1 : 0;

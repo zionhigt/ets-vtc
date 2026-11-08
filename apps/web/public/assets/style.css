@@ -140,6 +140,7 @@ button.danger { background: transparent; color: var(--bad); border-color: rgba(2
 button.danger.confirm { background: var(--bad); color: #fff; }
 button:disabled { opacity: 0.6; cursor: default; }
 .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.edit-cell { display: grid; gap: 6px; min-width: 160px; }
 
 .notice { border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; border: 1px solid var(--border); background: var(--surface); }
 .notice.error { border-color: rgba(255, 90, 60, 0.5); color: var(--bad); }
