@@ -25,5 +25,8 @@ export function publicRoutes(db) {
 
   r.get('/drivers', async (_req, res) => res.json(await driverStats(db)));
 
+  // Missions en cours (pour la section « En route » de l'accueil).
+  r.get('/on-road', async (_req, res) => res.json(await recentDeliveries(db, { limit: 50, status: 'in_progress' })));
+
   return r;
 }

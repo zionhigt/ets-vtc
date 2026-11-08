@@ -118,6 +118,19 @@ test('mission annulée, mission interrompue, livraison sans début', async () =>
   assert.equal(mine.body.recent.length, 2);
 });
 
+test('les missions en cours apparaissent dans « En route » puis en sortent à la livraison', async () => {
+  const d = await newDriver('enroute', 'En Route');
+  await send(d, 'job-started', job('route1', { cityDst: 'Berlin', cityDstId: 'berlin' }));
+  let onRoad = (await t.call('GET', '/public/on-road')).body;
+  const mine = onRoad.find((x) => x.driver.name === 'En Route');
+  assert.equal(mine.to.city, 'Berlin');
+  assert.equal(mine.income, 1000);
+  assert.equal((await t.call('GET', '/public/stats')).body.driversOnJob >= 1, true);
+  await send(d, 'job-delivered', { ...job('route1', { cityDst: 'Berlin', cityDstId: 'berlin' }), jobDeliveredRevenue: '1000' });
+  onRoad = (await t.call('GET', '/public/on-road')).body;
+  assert.equal(onRoad.some((x) => x.driver.name === 'En Route'), false);
+});
+
 test("l'identité de l'entreprise est modifiable par l'admin et publique", async () => {
   assert.equal((await t.call('GET', '/public/company')).body.name, 'Ma VTC');
   const put = await t.call('PUT', '/admin/company', {

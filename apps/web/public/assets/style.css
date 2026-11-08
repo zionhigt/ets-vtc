@@ -101,3 +101,5 @@ button:disabled { opacity: 0.6; cursor: default; }
 
 footer.site { color: var(--muted); font-size: 13px; padding-block: 24px; border-top: 1px solid var(--border); }
 .pager { display: flex; justify-content: center; margin-top: 16px; }
+.updated { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+.updated.stale { color: var(--warn); }

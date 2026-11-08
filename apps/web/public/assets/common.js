@@ -87,7 +87,44 @@ export function deliveryRow(d) {
   );
 }
 
-export const DELIVERY_HEAD = ['Date', 'Chauffeur', 'Trajet', 'Cargaison', 'Distance', 'Revenu', 'Amendes'];
+/**
+ * Rafraîchissement périodique (polling court) : sur l'hébergement mutualisé,
+ * les connexions longues (SSE, long polling) passent mal derrière Passenger.
+ * En pause quand l'onglet est masqué ; rafraîchit dès qu'il redevient visible.
+ */
+export function autoRefresh(render, { everyMs = 15_000, statusEl = null } = {}) {
+  let timer = null;
+  let running = false;
+  let lastOk = null;
+  const showStatus = (error) => {
+    if (!statusEl) return;
+    statusEl.textContent = error
+      ? `Mise à jour impossible (${error}) : nouvel essai dans ${everyMs / 1000} s`
+      : `Mis à jour à ${new Date(lastOk).toLocaleTimeString('fr-FR')} · actualisation toutes les ${everyMs / 1000} s`;
+    statusEl.classList.toggle('stale', Boolean(error));
+  };
+  async function tick() {
+    clearTimeout(timer);
+    if (document.visibilityState !== 'visible') return;
+    if (!running) {
+      running = true;
+      try {
+        await render();
+        lastOk = Date.now();
+        showStatus(null);
+      } catch (err) {
+        showStatus(err.message);
+      } finally {
+        running = false;
+      }
+    }
+    timer = setTimeout(tick, everyMs);
+  }
+  document.addEventListener('visibilitychange', tick);
+  return tick();
+}
+
+export const DELIVERY_HEAD =['Date', 'Chauffeur', 'Trajet', 'Cargaison', 'Distance', 'Revenu', 'Amendes'];
 
 export function table(head, rows, emptyText) {
   if (!rows.length) return el('div', { class: 'card empty' }, emptyText);

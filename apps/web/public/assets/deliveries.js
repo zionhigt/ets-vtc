@@ -1,4 +1,4 @@
-import { getJson, applyCompany, el, table, deliveryRow, DELIVERY_HEAD } from './common.js';
+import { getJson, applyCompany, el, table, deliveryRow, DELIVERY_HEAD, autoRefresh } from './common.js';
 
 const PAGE = 25;
 const params = new URLSearchParams(location.search);
@@ -13,15 +13,34 @@ const drivers = await getJson('/public/drivers');
 for (const d of drivers) select.append(el('option', { value: d.id }, d.name));
 select.value = params.get('driver') ?? '';
 
-async function load(reset) {
-  if (reset) rows = [];
+function query(before) {
   const q = new URLSearchParams({ limit: PAGE });
   if (select.value) q.set('driver', select.value);
-  if (rows.length) q.set('before', rows.at(-1).id);
-  const page = await getJson(`/public/deliveries?${q}`);
-  rows.push(...page);
+  if (before) q.set('before', before);
+  return `/public/deliveries?${q}`;
+}
+
+function show() {
   list.replaceChildren(table(DELIVERY_HEAD, rows.map(deliveryRow), 'Aucune livraison.'));
+}
+
+async function loadMore() {
+  const page = await getJson(query(rows.at(-1)?.id));
+  rows.push(...page);
+  show();
   more.hidden = page.length < PAGE;
+}
+
+/** Rafraîchissement : ajoute en tête les livraisons arrivées depuis, sans perdre les pages chargées. */
+async function refreshTop() {
+  const page = await getJson(query());
+  const known = new Set(rows.map((r) => r.id));
+  const fresh = page.filter((r) => !known.has(r.id));
+  if (!rows.length) more.hidden = page.length < PAGE;
+  if (fresh.length || !rows.length) {
+    rows = [...fresh, ...rows];
+    show();
+  }
 }
 
 select.addEventListener('change', () => {
@@ -29,8 +48,9 @@ select.addEventListener('change', () => {
   if (select.value) url.searchParams.set('driver', select.value);
   else url.searchParams.delete('driver');
   history.replaceState(null, '', url);
-  load(true);
+  rows = [];
+  refreshTop();
 });
-more.addEventListener('click', () => load(false));
+more.addEventListener('click', () => loadMore());
 
-await load(true);
+autoRefresh(refreshTop, { everyMs: 20_000, statusEl: document.getElementById('updated') });
