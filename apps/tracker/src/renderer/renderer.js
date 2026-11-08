@@ -57,9 +57,6 @@ function render(s) {
   const f = $('settings');
   f.snapshotIntervalMs.value = String(s.config.snapshotIntervalMs);
   f.autoStartTracking.checked = s.config.autoStartTracking;
-  f.startWithWindows.checked = s.config.startWithWindows;
-  f.startWithWindows.disabled = !s.canStartWithWindows;
-  $('startup-hint').hidden = s.canStartWithWindows;
 }
 
 $('login').addEventListener('submit', (e) => {
@@ -98,7 +95,6 @@ $('settings').addEventListener('change', (e) => {
     window.vtc.saveSettings({
       snapshotIntervalMs: Number(f.snapshotIntervalMs.value),
       autoStartTracking: f.autoStartTracking.checked,
-      startWithWindows: f.startWithWindows.checked,
     }),
   );
 });

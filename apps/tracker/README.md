@@ -13,13 +13,7 @@ télémétrie et envoie les événements au serveur de la VTC.
 4. Lancer le jeu et valider le message sur les fonctionnalités SDK avancées.
 
 Le suivi démarre seul. Fermer la fenêtre laisse le tracker actif dans la zone de
-notification ; **Quitter** depuis l'icône l'arrête.
-
-**Lancer ets-vtc avec Windows** : le tracker démarre à l'ouverture de la session,
-caché dans la zone de notification, et se reconnecte seul. Avec « Démarrer le
-suivi automatiquement », il suffit de lancer le jeu. Si l'exe est déplacé, le
-relancer une fois depuis son nouvel emplacement met à jour le démarrage
-automatique. Sans réseau, les événements
+notification ; **Quitter** depuis l'icône l'arrête. Sans réseau, les événements
 sont gardés sur le disque et envoyés au retour de la connexion.
 
 Données locales, dans `%APPDATA%\ets-vtc` : `config.json` (paramètres),

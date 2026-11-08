@@ -8,7 +8,6 @@ export const DEFAULT_CONFIG = {
   gameDir: '',
   snapshotIntervalMs: 5000,
   autoStartTracking: true,
-  startWithWindows: false,
 };
 
 const LIMITS = { snapshotIntervalMs: [1000, 60000] };
@@ -38,7 +37,6 @@ export function sanitize(config) {
   const [min, max] = LIMITS.snapshotIntervalMs;
   out.snapshotIntervalMs = Math.min(max, Math.max(min, Number(out.snapshotIntervalMs) || DEFAULT_CONFIG.snapshotIntervalMs));
   out.autoStartTracking = Boolean(out.autoStartTracking);
-  out.startWithWindows = Boolean(out.startWithWindows);
   out.gameDir = String(out.gameDir ?? '');
   return out;
 }
